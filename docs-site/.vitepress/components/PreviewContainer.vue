@@ -87,8 +87,9 @@ async function loadComponent(componentName: string): Promise<any> {
       .toLowerCase()
       .replace(/^-/, '')
     
+    // 使用 @vite-ignore 来允许动态导入
     // @ts-ignore - 动态导入路径
-    const module = await import(`../../../uni_modules/belay-unix/components/${kebabName}/index.vue`)
+    const module = await import(/* @vite-ignore */ `../../../uni_modules/belay-unix/components/${kebabName}/index.vue`)
     if (module && module.default) {
       componentCache[componentName] = module.default
       return module.default

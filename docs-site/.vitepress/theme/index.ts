@@ -88,7 +88,8 @@ export default {
           try {
             // 尝试从组件库导入单个组件的 .vue 文件
             const compPath = `../../../uni_modules/belay-unix/components/${comp.path}/index.vue`
-            const compModule = await import(compPath).catch(() => null)
+            // @ts-ignore - 动态导入路径，Vite 无法静态分析
+            const compModule = await import(/* @vite-ignore */ compPath).catch(() => null)
             if (compModule && compModule.default) {
               app.component(comp.name, compModule.default)
               // 同时注册 kebab-case 名称
