@@ -1,0 +1,82 @@
+<template>
+	<view>
+		<image class="logo" src="/static/logo.png"></image>
+		<text class="title">{{title}}</text>
+		
+		<!-- 测试 BlButton 组件的属性提示 -->
+		<view class="test-section">
+			<text class="section-title">Button 组件测试</text>
+			<bl-button type="primary" size="large">大按钮</bl-button>
+			<bl-button type="success" size="medium">中按钮</bl-button>
+			<bl-button type="warning" size="default">默认按钮</bl-button>
+			<bl-button type="danger" size="small">小按钮</bl-button>
+			<bl-button type="default" size="mini" :plain="true">迷你按钮</bl-button>
+		</view>
+		
+		<!-- 测试 BlInput 组件 -->
+		<view class="test-section">
+			<text class="section-title">Input 组件测试</text>
+			<bl-input type="text" placeholder="文本输入"></bl-input>
+			<bl-input type="number" placeholder="数字输入"></bl-input>
+			<bl-input type="tel" placeholder="电话输入"></bl-input>
+		</view>
+		
+		<!-- 测试 BlTag 组件 -->
+		<view class="test-section">
+			<text class="section-title">Tag 组件测试</text>
+			<bl-tag type="primary" size="small" effect="dark">主要标签</bl-tag>
+			<bl-tag type="success" size="medium" effect="light">成功标签</bl-tag>
+			<bl-tag type="warning" size="large" effect="plain">警告标签</bl-tag>
+		</view>
+		
+		<!-- 测试其他组件 -->
+		<view class="test-section">
+			<text class="section-title">其他组件测试</text>
+			<bl-icon name="home" size="20" color="#409eff"></bl-icon>
+			<bl-switch type="switch" :checked="false"></bl-switch>
+			<bl-progress type="line" :percent="60"></bl-progress>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import type { BlButtonProps, BlInputType, BlTagEffect } from '@/uni_modules/belay-unix'
+	
+	const title = ref('Belay-Unix 组件测试')
+	
+	// 测试类型导入
+	const buttonProps: BlButtonProps = {
+		type: 'primary',
+		size: 'large',
+		plain: false
+	}
+	
+	const inputType: BlInputType = 'text'
+	const tagEffect: BlTagEffect = 'dark'
+</script>
+
+<style>
+	.logo {
+		height: 100px;
+		width: 100px;
+		margin: 100px auto 25px auto;
+	}
+
+	.title {
+		font-size: 18px;
+		color: #8f8f94;
+		text-align: center;
+	}
+	
+	.test-section {
+		padding: 20px;
+		margin-bottom: 20px;
+	}
+	
+	.section-title {
+		font-size: 16px;
+		font-weight: bold;
+		margin-bottom: 10px;
+		color: #333;
+	}
+</style>

@@ -1,0 +1,9 @@
+[build]
+  command = "cd docs-site && npm install && npm run build"
+  publish = "docs-site/.vitepress/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

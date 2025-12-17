@@ -1,0 +1,23 @@
+{
+  "name": "belay-unix-docs",
+  "version": "1.0.0",
+  "description": "Belay-Unix 组件库文档网站",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "VITE_BASE=/belay-unix/ vitepress build",
+    "build:local": "vitepress build",
+    "preview": "vitepress preview",
+    "deploy": "npm run build && node scripts/deploy.js",
+    "generate:docs": "node scripts/generate-component-docs.js",
+    "generate:sidebar": "node scripts/generate-sidebar.js",
+    "generate:all": "npm run generate:docs && npm run generate:sidebar"
+  },
+  "devDependencies": {
+    "@monaco-editor/loader": "^1.4.0",
+    "monaco-editor": "^0.44.0",
+    "sass-embedded": "^1.97.0",
+    "vitepress": "^1.0.0",
+    "vue": "^3.3.4"
+  }
+}
