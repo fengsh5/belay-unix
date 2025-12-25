@@ -1,0 +1,42 @@
+<template>
+  <view class="example-basic">
+    <bl-grid :column-count="4">
+      <bl-grid-item>
+        <view class="grid-item">
+          <text>1</text>
+        </view>
+      </bl-grid-item>
+      <bl-grid-item>
+        <view class="grid-item">
+          <text>2</text>
+        </view>
+      </bl-grid-item>
+      <bl-grid-item>
+        <view class="grid-item">
+          <text>3</text>
+        </view>
+      </bl-grid-item>
+      <bl-grid-item>
+        <view class="grid-item">
+          <text>4</text>
+        </view>
+      </bl-grid-item>
+    </bl-grid>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.grid-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+</style>
+

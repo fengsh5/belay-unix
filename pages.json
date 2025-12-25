@@ -13,5 +13,15 @@
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^bl-tree-node$": "@/uni_modules/belay-unix/components/bl-tree/node.uvue",
+			"^bl-collapse-panel$": "@/uni_modules/belay-unix/components/bl-collapse/panel.uvue",
+			"^bl-timeline-item$": "@/uni_modules/belay-unix/components/bl-timeline/item.uvue",
+			"^bl-descriptions-item$": "@/uni_modules/belay-unix/components/bl-descriptions/item.uvue",
+			"^bl-menu-item$": "@/uni_modules/belay-unix/components/bl-menu/item.uvue"
+		}
+	},
 	"uniIdRouter": {}
 }

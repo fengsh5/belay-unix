@@ -1,0 +1,478 @@
+<template>
+  <view class="code-highlight">
+    <view class="code-header" v-if="language">
+      <text class="code-language">{{ language }}</text>
+      <text class="code-copy" @click="copyCode">复制</text>
+    </view>
+    <view class="code-content">
+      <view class="code-lines">
+        <view 
+          v-for="(line, index) in codeLines" 
+          :key="index"
+          class="code-line"
+        >
+          <text class="line-number">{{ index + 1 }}</text>
+          <view class="line-content">
+            <text 
+              v-for="(token, tokenIndex) in parseLine(line)" 
+              :key="tokenIndex"
+              :class="['code-token', `token-${token.type}`]"
+            >
+              {{ token.text }}
+            </text>
+            <text v-if="parseLine(line).length === 0" class="code-token token-text"> </text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+
+const props = defineProps<{
+  code: string
+  language?: string
+}>()
+
+type CodeToken = {
+  text: string
+  type: string
+}
+
+const codeLines = computed(() => {
+  if (!props.code) return []
+  return props.code.split('\n')
+})
+
+function parseLine(line: string): CodeToken[] {
+  const lang = props.language || ''
+  const tokens: CodeToken[] = []
+  
+  if (lang === 'typescript' || lang === 'ts' || lang === 'javascript' || lang === 'js') {
+    return parseJavaScript(line)
+  } else if (lang === 'vue' || lang === 'html') {
+    return parseVue(line)
+  } else if (lang === 'css' || lang === 'scss') {
+    return parseCSS(line)
+  } else if (lang === 'bash' || lang === 'shell' || lang === 'sh') {
+    return parseBash(line)
+  } else if (lang === 'json') {
+    return parseJSON(line)
+  }
+  
+  // 默认返回纯文本
+  tokens.push({ text: line, type: 'text' })
+  return tokens
+}
+
+function parseJavaScript(line: string): CodeToken[] {
+  const tokens: CodeToken[] = []
+  const keywords = ['const', 'let', 'var', 'function', 'if', 'else', 'for', 'while', 'return', 'import', 'export', 'from', 'default', 'async', 'await', 'class', 'extends', 'interface', 'type', 'enum', 'typeof', 'instanceof', 'new', 'this', 'super', 'static', 'public', 'private', 'protected', 'readonly', 'abstract', 'as', 'null', 'undefined', 'true', 'false']
+  
+  let remaining = line
+  let pos = 0
+  
+  while (pos < remaining.length) {
+    // 匹配字符串
+    const stringMatch = remaining.substring(pos).match(/^(['"])((?:\\.|(?!\1)[^\\])*?)\1/)
+    if (stringMatch != null) {
+      tokens.push({ text: stringMatch[0], type: 'string' })
+      pos += stringMatch[0].length
+      continue
+    }
+    
+    // 匹配注释
+    if (remaining.substring(pos).startsWith('//')) {
+      tokens.push({ text: remaining.substring(pos), type: 'comment' })
+      break
+    }
+    
+    // 匹配数字
+    const numberMatch = remaining.substring(pos).match(/^\d+\.?\d*/)
+    if (numberMatch != null) {
+      tokens.push({ text: numberMatch[0], type: 'number' })
+      pos += numberMatch[0].length
+      continue
+    }
+    
+    // 匹配关键字
+    let matched = false
+    for (const keyword of keywords) {
+      const regex = new RegExp(`^\\b${keyword}\\b`)
+      if (regex.test(remaining.substring(pos))) {
+        tokens.push({ text: keyword, type: 'keyword' })
+        pos += keyword.length
+        matched = true
+        break
+      }
+    }
+    if (matched) continue
+    
+    // 匹配函数名（标识符后跟括号）
+    const funcMatch = remaining.substring(pos).match(/^([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/)
+    if (funcMatch != null) {
+      tokens.push({ text: funcMatch[1], type: 'function' })
+      pos += funcMatch[1].length
+      continue
+    }
+    
+    // 普通文本
+    const nextMatch = remaining.substring(pos).match(/^[^\w\s'"]+/)
+    if (nextMatch != null) {
+      tokens.push({ text: nextMatch[0], type: 'text' })
+      pos += nextMatch[0].length
+    } else {
+      const wordMatch = remaining.substring(pos).match(/^\S+/)
+      if (wordMatch != null) {
+        tokens.push({ text: wordMatch[0], type: 'text' })
+        pos += wordMatch[0].length
+      } else {
+        tokens.push({ text: remaining.substring(pos, pos + 1), type: 'text' })
+        pos++
+      }
+    }
+  }
+  
+  return tokens
+}
+
+function parseVue(line: string): CodeToken[] {
+  const tokens: CodeToken[] = []
+  let remaining = line
+  let pos = 0
+  let processedLength = 0
+  
+  while (pos < remaining.length) {
+    // 匹配 HTML 标签（包括自闭合标签）
+    const ltChar = String.fromCharCode(60) // '<'
+    const tagPattern = new RegExp('^' + ltChar + '(/?)([\\w-]+)')
+    const tagMatch = remaining.substring(pos).match(tagPattern)
+    if (tagMatch != null) {
+      // 添加标签前的文本（只添加未处理的部分）
+      if (pos > processedLength) {
+        const beforeText = remaining.substring(processedLength, pos)
+        if (beforeText.length > 0) {
+          tokens.push({ text: beforeText, type: 'text' })
+        }
+      }
+      
+      const slash = tagMatch[1]
+      const tagName = tagMatch[2]
+      const matchLength = tagMatch[0].length
+      
+      // 查找标签结束位置
+      const gtChar = String.fromCharCode(62) // '>'
+      const gtPos = remaining.indexOf(gtChar, pos)
+      
+      if (gtPos > pos) {
+        // 添加开始符号
+        tokens.push({ text: ltChar + slash, type: 'text' })
+        // 添加标签名
+        tokens.push({ text: tagName, type: 'tag' })
+        
+        // 提取标签属性部分（如果有）
+        const attrText = remaining.substring(pos + matchLength, gtPos)
+        if (attrText.trim()) {
+          tokens.push({ text: attrText, type: 'text' })
+        }
+        // 添加结束符号
+        tokens.push({ text: gtChar, type: 'text' })
+        // 更新已处理长度
+        processedLength = gtPos + 1
+        // 移动到标签结束位置之后
+        pos = gtPos + 1
+      } else {
+        // 没有找到结束符号，只添加已匹配的部分
+        tokens.push({ text: ltChar + slash, type: 'text' })
+        tokens.push({ text: tagName, type: 'tag' })
+        processedLength = pos + matchLength
+        pos += matchLength
+      }
+      continue
+    }
+    
+    // 匹配 Vue 指令
+    const directivePattern = new RegExp('^(v-[a-z-]+|@[a-z-]+|:[\\w-]+)=')
+    const directiveMatch = remaining.substring(pos).match(directivePattern)
+    if (directiveMatch != null) {
+      // 添加指令前的文本
+      if (pos > processedLength) {
+        const beforeText = remaining.substring(processedLength, pos)
+        if (beforeText.length > 0) {
+          tokens.push({ text: beforeText, type: 'text' })
+        }
+      }
+      tokens.push({ text: directiveMatch[1], type: 'directive' })
+      tokens.push({ text: '=', type: 'text' })
+      processedLength = pos + directiveMatch[0].length
+      pos += directiveMatch[0].length
+      continue
+    }
+    
+    // 匹配插值表达式
+    const interpPattern = new RegExp('^\\{\\{([^}]+)\\}\\}')
+    const interpMatch = remaining.substring(pos).match(interpPattern)
+    if (interpMatch != null) {
+      // 添加插值表达式前的文本
+      if (pos > processedLength) {
+        const beforeText = remaining.substring(processedLength, pos)
+        if (beforeText.length > 0) {
+          tokens.push({ text: beforeText, type: 'text' })
+        }
+      }
+      tokens.push({ text: '{{', type: 'interpolation' })
+      tokens.push({ text: interpMatch[1], type: 'text' })
+      tokens.push({ text: '}}', type: 'interpolation' })
+      processedLength = pos + interpMatch[0].length
+      pos += interpMatch[0].length
+      continue
+    }
+    
+    // 匹配字符串
+    const stringPattern = new RegExp("^(['\"])((?:\\\\.|(?!\\1)[^\\\\])*?)\\1")
+    const stringMatch = remaining.substring(pos).match(stringPattern)
+    if (stringMatch != null) {
+      // 添加字符串前的文本
+      if (pos > processedLength) {
+        const beforeText = remaining.substring(processedLength, pos)
+        if (beforeText.length > 0) {
+          tokens.push({ text: beforeText, type: 'text' })
+        }
+      }
+      tokens.push({ text: stringMatch[0], type: 'string' })
+      processedLength = pos + stringMatch[0].length
+      pos += stringMatch[0].length
+      continue
+    }
+    
+    // 普通文本，继续查找
+    pos++
+  }
+  
+  // 添加剩余的文本
+  if (processedLength < remaining.length) {
+    const remainingText = remaining.substring(processedLength)
+    if (remainingText.length > 0) {
+      tokens.push({ text: remainingText, type: 'text' })
+    }
+  }
+  
+  return tokens.length > 0 ? tokens : [{ text: line, type: 'text' }]
+}
+
+function parseCSS(line: string): CodeToken[] {
+  const tokens: CodeToken[] = []
+  // 简化的 CSS 解析
+  tokens.push({ text: line, type: 'text' })
+  return tokens
+}
+
+function parseBash(line: string): CodeToken[] {
+  const tokens: CodeToken[] = []
+  // 简化的 Bash 解析
+  tokens.push({ text: line, type: 'text' })
+  return tokens
+}
+
+function parseJSON(line: string): CodeToken[] {
+  const tokens: CodeToken[] = []
+  // 简化的 JSON 解析
+  tokens.push({ text: line, type: 'text' })
+  return tokens
+}
+
+function copyCode() {
+  // #ifdef H5
+  if (typeof navigator != 'undefined' && navigator.clipboard != null) {
+    navigator.clipboard.writeText(props.code).then(() => {
+      uni.showToast({
+        title: '已复制',
+        icon: 'success'
+      })
+    }).catch(() => {
+      uni.showToast({
+        title: '复制失败',
+        icon: 'none'
+      })
+    })
+  } else {
+    // 降级方案
+    const textarea = document.createElement('textarea')
+    textarea.value = props.code
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    try {
+      document.execCommand('copy')
+      uni.showToast({
+        title: '已复制',
+        icon: 'success'
+      })
+    } catch (e) {
+      uni.showToast({
+        title: '复制失败',
+        icon: 'none'
+      })
+    }
+    document.body.removeChild(textarea)
+  }
+  // #endif
+  // #ifndef H5
+  // 在 App 中可以使用 uni.setClipboardData
+  uni.setClipboardData({
+    data: props.code,
+    success: () => {
+      uni.showToast({
+        title: '已复制',
+        icon: 'success'
+      })
+    },
+    fail: () => {
+      uni.showToast({
+        title: '复制失败',
+        icon: 'none'
+      })
+    }
+  })
+  // #endif
+}
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.code-highlight {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+  background: #f6f8fa;
+  width: 100%;
+  height: 100%;
+}
+
+.code-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: $vp-spacing-sm $vp-spacing-md;
+  background: $vp-c-divider-light;
+  border-bottom: 1px solid $vp-c-divider;
+}
+
+.code-language {
+  font-size: $vp-font-size-xs;
+  color: $vp-c-text-3;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-weight: $vp-font-weight-medium;
+}
+
+.code-copy {
+  font-size: $vp-font-size-xs;
+  color: $vp-c-brand;
+  cursor: pointer;
+  padding: $vp-spacing-xs $vp-spacing-sm;
+  border-radius: $vp-border-radius-sm;
+  transition: all $vp-transition-base;
+  
+  /* #ifdef H5 */
+  &:hover {
+    background: $vp-c-bg-alt;
+  }
+  /* #endif */
+  
+  &:active {
+    background: $vp-c-divider;
+  }
+}
+
+.code-content {
+  padding: $vp-spacing-md;
+  overflow-x: auto;
+  overflow-y: auto;
+  background: #f6f8fa;
+  height: 100%;
+}
+
+.code-lines {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: $vp-font-size-sm;
+  line-height: 1.6;
+}
+
+.code-line {
+  display: flex;
+  flex-direction: row;
+  min-height: 1.6em;
+}
+
+.line-number {
+  width: 40px;
+  padding-right: $vp-spacing-md;
+  text-align: right;
+  color: $vp-c-text-3;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.line-content {
+  flex: 1;
+  color: $vp-c-text-1;
+  white-space: pre;
+  word-break: break-all;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+/* 语法高亮样式 */
+.code-token {
+  display: inline-block;
+  white-space: pre;
+}
+
+.token-keyword {
+  color: #cf222e;
+  font-weight: 600;
+}
+
+.token-string {
+  color: #0a3069;
+}
+
+.token-number {
+  color: #0550ae;
+}
+
+.token-comment {
+  color: #6e7781;
+  font-style: italic;
+}
+
+.token-function {
+  color: #8250df;
+}
+
+.token-tag {
+  color: #116329;
+}
+
+.token-directive {
+  color: #8250df;
+}
+
+.token-interpolation {
+  color: #cf222e;
+}
+
+.token-text {
+  color: #24292f;
+}
+</style>
+

@@ -1,0 +1,15 @@
+<template>
+  <view class="example-basic">
+    <bl-button>登录</bl-button>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

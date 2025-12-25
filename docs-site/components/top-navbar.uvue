@@ -1,0 +1,208 @@
+<template>
+  <bl-custom-navigation-bar 
+    :title="currentTitle" 
+    :show-back="showBack"
+    :background-color="backgroundColor"
+    :text-color="textColor"
+    :fixed="true"
+  >
+    <template #center>
+      <view class="navbar-center">
+        <view class="navbar-logo">
+          <text class="navbar-logo-text">Belay-Unix</text>
+        </view>
+        <view class="navbar-links">
+          <text 
+            v-for="item in navItems" 
+            :key="item.path"
+            :class="['navbar-link', { 'navbar-link--active': isActive(item.path) }]"
+            @click="navigateTo(item.path)"
+          >
+            {{ item.text }}
+          </text>
+        </view>
+      </view>
+    </template>
+    <template #right>
+      <view class="navbar-right">
+        <text class="navbar-github" @click="openGitHub">GitHub</text>
+      </view>
+    </template>
+  </bl-custom-navigation-bar>
+</template>
+
+<script setup lang="uts">
+import { ref, computed, onMounted, watch } from 'vue'
+
+type NavItem = {
+  text: string
+  path: string
+}
+
+const navItems = ref<NavItem[]>([
+  { text: '首页', path: '/pages/index/index' },
+  { text: '指南', path: '/pages/guide/index' },
+  { text: '组件', path: '/pages/components/index' }
+])
+
+const currentPath = ref<string>('')
+const backgroundColor = ref<string>('#ffffff')
+const textColor = ref<string>('#323233')
+
+const currentTitle = computed(() => {
+  // 根据当前路径返回标题，如果不在导航项中则返回空
+  const current = navItems.value.find(item => item.path === currentPath.value)
+  return current != null ? current.text : ''
+})
+
+const showBack = computed(() => {
+  // 首页不显示返回按钮
+  return currentPath.value != '/pages/index/index'
+})
+
+onMounted(() => {
+  updateCurrentPath()
+})
+
+function updateCurrentPath() {
+  // #ifdef APP || H5
+  const pages = getCurrentPages()
+  if (pages != null && pages.length > 0) {
+    const currentPage = pages[pages.length - 1]
+    if (currentPage != null && currentPage.route != null) {
+      currentPath.value = `/${currentPage.route}`
+    }
+  }
+  // #endif
+}
+
+function isActive(path: string): boolean {
+  return currentPath.value === path
+}
+
+function navigateTo(path: string) {
+  if (currentPath.value === path) {
+    return
+  }
+  // 如果是首页，使用 reLaunch，否则使用 navigateTo
+  if (path === '/pages/index/index') {
+    uni.reLaunch({
+      url: path
+    })
+  } else {
+    uni.navigateTo({
+      url: path,
+      fail: () => {
+        // 如果 navigateTo 失败，尝试使用 reLaunch
+        uni.reLaunch({
+          url: path
+        })
+      }
+    })
+  }
+}
+
+function openGitHub() {
+  // #ifdef H5
+  if (typeof window != 'undefined' && window.open != null) {
+    window.open('https://github.com/fengsh5/belay-unix', '_blank')
+  }
+  // #endif
+  // #ifdef APP
+  // 在 App 中可以使用 plus.runtime.openURL
+  // #ifdef APP-PLUS
+  // @ts-ignore
+  if (typeof plus != 'undefined' && plus.runtime != null) {
+    // @ts-ignore
+    plus.runtime.openURL('https://github.com/fengsh5/belay-unix')
+  }
+  // #endif
+  // #endif
+}
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.navbar-center {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $vp-spacing-md;
+  width: 100%;
+  justify-content: center;
+  /* #ifdef H5 */
+  gap: $vp-spacing-xl;
+  /* #endif */
+}
+
+.navbar-logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* #ifndef H5 */
+  display: none;
+  /* #endif */
+}
+
+.navbar-logo-text {
+  font-size: $vp-font-size-lg;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-brand;
+}
+
+.navbar-links {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $vp-spacing-sm;
+  /* #ifdef H5 */
+  gap: $vp-spacing-lg;
+  /* #endif */
+}
+
+.navbar-link {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-2;
+  padding: $vp-spacing-xs $vp-spacing-sm;
+  border-radius: $vp-border-radius-sm;
+  transition: all $vp-transition-base;
+  /* #ifdef H5 */
+  font-size: $vp-font-size-base;
+  cursor: pointer;
+  &:hover {
+    color: $vp-c-text-1;
+  }
+  /* #endif */
+}
+
+.navbar-link--active {
+  color: $vp-c-brand;
+  font-weight: $vp-font-weight-medium;
+}
+
+.navbar-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.navbar-github {
+  font-size: $vp-font-size-xs;
+  color: $vp-c-text-2;
+  padding: $vp-spacing-xs $vp-spacing-sm;
+  border: 1px solid $vp-c-divider;
+  border-radius: $vp-border-radius-sm;
+  transition: all $vp-transition-base;
+  /* #ifdef H5 */
+  font-size: $vp-font-size-sm;
+  padding: $vp-spacing-xs 12px;
+  cursor: pointer;
+  &:hover {
+    border-color: $vp-c-brand;
+    color: $vp-c-brand;
+  }
+  /* #endif */
+}
+</style>
+

@@ -1,0 +1,31 @@
+<template>
+  <view class="example-basic">
+    <bl-share-app-message 
+      title="分享标题"
+      path="/pages/index/index"
+      @success="handleSuccess"
+      @fail="handleFail"
+    >
+      <template #trigger>
+        <bl-button type="primary">分享</bl-button>
+      </template>
+    </bl-share-app-message>
+  </view>
+</template>
+
+<script setup lang="uts">
+const handleSuccess = (event: any) => {
+  console.log('分享成功', event)
+}
+
+const handleFail = (event: any) => {
+  console.log('分享失败', event)
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

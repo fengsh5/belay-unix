@@ -1,0 +1,43 @@
+<template>
+  <view class="example-basic">
+    <bl-checker 
+      type="checkbox" 
+      :checked="checked1" 
+      @change="handleChange1"
+    >
+      <text>选项1</text>
+    </bl-checker>
+    <bl-checker 
+      type="checkbox" 
+      :checked="checked2" 
+      @change="handleChange2"
+    >
+      <text>选项2</text>
+    </bl-checker>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const checked1 = ref(false)
+const checked2 = ref(true)
+
+const handleChange1 = (checked: boolean) => {
+  checked1.value = checked
+}
+
+const handleChange2 = (checked: boolean) => {
+  checked2.value = checked
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>
+

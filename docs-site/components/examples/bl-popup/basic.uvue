@@ -1,0 +1,31 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showPopup = true">打开弹出层</bl-button>
+    <bl-popup :visible="showPopup" @close="showPopup = false">
+      <view class="popup-content">
+        <text>这是弹出层内容</text>
+        <bl-button @click="showPopup = false" style="margin-top: 20px;">关闭</bl-button>
+      </view>
+    </bl-popup>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showPopup = ref(false)
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.popup-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+</style>
+

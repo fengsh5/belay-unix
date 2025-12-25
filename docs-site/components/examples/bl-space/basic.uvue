@@ -1,0 +1,16 @@
+<template>
+  <view class="example-basic">
+    <bl-space>
+      <bl-button>按钮1</bl-button>
+      <bl-button>按钮2</bl-button>
+      <bl-button>按钮3</bl-button>
+    </bl-space>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

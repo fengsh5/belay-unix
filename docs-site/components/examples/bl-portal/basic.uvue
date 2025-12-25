@@ -1,0 +1,31 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showPortal = !showPortal">切换传送门</bl-button>
+    <bl-portal v-if="showPortal" target="body">
+      <view class="portal-content">
+        <text>这是通过传送门渲染的内容</text>
+      </view>
+    </bl-portal>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showPortal = ref(false)
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.portal-content {
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  margin-top: 12px;
+  text-align: center;
+}
+</style>
+

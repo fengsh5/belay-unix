@@ -1,0 +1,12 @@
+<template>
+  <view class="example-basic">
+    <bl-notice-bar text="这是一条通知消息"></bl-notice-bar>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

@@ -1,0 +1,485 @@
+<template>
+  <view class="preview-renderer-simple">
+    <!-- 根据 examplePath 动态加载组件 -->
+    <component 
+      v-if="componentInstance"
+      :is="componentInstance"
+    ></component>
+    
+    <!-- 显示加载信息 -->
+    <view v-else class="preview-info">
+      <text class="info-text">未找到示例组件: {{ examplePath || '未指定' }}</text>
+      <text class="info-hint">请确保已创建对应的示例组件文件</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+
+// 导入所有示例组件（按需添加）
+import BlButtonBasic from '@/components/examples/bl-button/basic.uvue'
+import BlButtonTypes from '@/components/examples/bl-button/types.uvue'
+import BlButtonSizes from '@/components/examples/bl-button/sizes.uvue'
+import BlAvatarBasic from '@/components/examples/bl-avatar/basic.uvue'
+import BlBadgeBasic from '@/components/examples/bl-badge/basic.uvue'
+import BlInputBasic from '@/components/examples/bl-input/basic.uvue'
+import BlInputTypes from '@/components/examples/bl-input/types.uvue'
+import BlInputDisabled from '@/components/examples/bl-input/disabled.uvue'
+import BlSwitchBasic from '@/components/examples/bl-switch/basic.uvue'
+import BlTextBasic from '@/components/examples/bl-text/basic.uvue'
+import BlTagBasic from '@/components/examples/bl-tag/basic.uvue'
+import BlCellBasic from '@/components/examples/bl-cell/basic.uvue'
+import BlDividerBasic from '@/components/examples/bl-divider/basic.uvue'
+import BlImageBasic from '@/components/examples/bl-image/basic.uvue'
+import BlCheckboxBasic from '@/components/examples/bl-checkbox/basic.uvue'
+import BlRadioBasic from '@/components/examples/bl-radio/basic.uvue'
+import BlRateBasic from '@/components/examples/bl-rate/basic.uvue'
+import BlProgressBasic from '@/components/examples/bl-progress/basic.uvue'
+import BlLoadingBasic from '@/components/examples/bl-loading/basic.uvue'
+import BlEmptyBasic from '@/components/examples/bl-empty/basic.uvue'
+import BlIconBasic from '@/components/examples/bl-icon/basic.uvue'
+import BlViewBasic from '@/components/examples/bl-view/basic.uvue'
+import BlAlertBasic from '@/components/examples/bl-alert/basic.uvue'
+import BlTextareaBasic from '@/components/examples/bl-textarea/basic.uvue'
+import BlSliderBasic from '@/components/examples/bl-slider/basic.uvue'
+import BlNumberInputBasic from '@/components/examples/bl-number-input/basic.uvue'
+import BlFlexBasic from '@/components/examples/bl-flex/basic.uvue'
+import BlGapBasic from '@/components/examples/bl-gap/basic.uvue'
+import BlResultBasic from '@/components/examples/bl-result/basic.uvue'
+import BlSkeletonBasic from '@/components/examples/bl-skeleton/basic.uvue'
+import BlCollapseBasic from '@/components/examples/bl-collapse/basic.uvue'
+import BlTabsBasic from '@/components/examples/bl-tabs/basic.uvue'
+import BlPaginationBasic from '@/components/examples/bl-pagination/basic.uvue'
+import BlSegmentedBasic from '@/components/examples/bl-segmented/basic.uvue'
+import BlAmountBasic from '@/components/examples/bl-amount/basic.uvue'
+import BlStatisticBasic from '@/components/examples/bl-statistic/basic.uvue'
+import BlPopupBasic from '@/components/examples/bl-popup/basic.uvue'
+import BlDialogBasic from '@/components/examples/bl-dialog/basic.uvue'
+import BlDrawerBasic from '@/components/examples/bl-drawer/basic.uvue'
+import BlNoticeBarBasic from '@/components/examples/bl-notice-bar/basic.uvue'
+import BlBackTopBasic from '@/components/examples/bl-back-top/basic.uvue'
+import BlSearchBarBasic from '@/components/examples/bl-search-bar/basic.uvue'
+import BlCountDownBasic from '@/components/examples/bl-count-down/basic.uvue'
+import BlTimelineBasic from '@/components/examples/bl-timeline/basic.uvue'
+import BlGridBasic from '@/components/examples/bl-grid/basic.uvue'
+import BlSwiperBasic from '@/components/examples/bl-swiper/basic.uvue'
+import BlStepsBasic from '@/components/examples/bl-steps/basic.uvue'
+import BlDescriptionsBasic from '@/components/examples/bl-descriptions/basic.uvue'
+import BlSpaceBasic from '@/components/examples/bl-space/basic.uvue'
+import BlTooltipBasic from '@/components/examples/bl-tooltip/basic.uvue'
+import BlPopoverBasic from '@/components/examples/bl-popover/basic.uvue'
+import BlPopconfirmBasic from '@/components/examples/bl-popconfirm/basic.uvue'
+import BlUploaderBasic from '@/components/examples/bl-uploader/basic.uvue'
+import BlCheckTagBasic from '@/components/examples/bl-check-tag/basic.uvue'
+import BlFloatButtonBasic from '@/components/examples/bl-float-button/basic.uvue'
+import BlQrcodeBasic from '@/components/examples/bl-qrcode/basic.uvue'
+import BlRowBasic from '@/components/examples/bl-row/basic.uvue'
+import BlTreeBasic from '@/components/examples/bl-tree/basic.uvue'
+import BlTransferBasic from '@/components/examples/bl-transfer/basic.uvue'
+import BlCalendarBasic from '@/components/examples/bl-calendar/basic.uvue'
+import BlTableBasic from '@/components/examples/bl-table/basic.uvue'
+import BlVideoBasic from '@/components/examples/bl-video/basic.uvue'
+import BlWatermarkBasic from '@/components/examples/bl-watermark/basic.uvue'
+import BlFormBasic from '@/components/examples/bl-form/basic.uvue'
+import BlCheckboxGroupBasic from '@/components/examples/bl-checkbox-group/basic.uvue'
+import BlRadioGroupBasic from '@/components/examples/bl-radio-group/basic.uvue'
+import BlSortTagBasic from '@/components/examples/bl-sort-tag/basic.uvue'
+import BlSpinnerBasic from '@/components/examples/bl-spinner/basic.uvue'
+import BlTabbarBasic from '@/components/examples/bl-tabbar/basic.uvue'
+import BlMenuBasic from '@/components/examples/bl-menu/basic.uvue'
+import BlAutocompleteBasic from '@/components/examples/bl-autocomplete/basic.uvue'
+import BlScrollViewBasic from '@/components/examples/bl-scroll-view/basic.uvue'
+import BlModalBasic from '@/components/examples/bl-modal/basic.uvue'
+import BlListViewBasic from '@/components/examples/bl-list-view/basic.uvue'
+import BlHairlineBasic from '@/components/examples/bl-hairline/basic.uvue'
+import BlPageBasic from '@/components/examples/bl-page/basic.uvue'
+import BlTreeselectBasic from '@/components/examples/bl-treeselect/basic.uvue'
+import BlPickerSelectorBasic from '@/components/examples/bl-picker-selector/basic.uvue'
+import BlPickerDateBasic from '@/components/examples/bl-picker-date/basic.uvue'
+import BlPickerTimeBasic from '@/components/examples/bl-picker-time/basic.uvue'
+import BlPickerMultiSelectorBasic from '@/components/examples/bl-picker-multi-selector/basic.uvue'
+import BlPickerCascaderSelectorBasic from '@/components/examples/bl-picker-cascader-selector/basic.uvue'
+import BlCheckboxPopupBasic from '@/components/examples/bl-checkbox-popup/basic.uvue'
+import BlRadioPopupBasic from '@/components/examples/bl-radio-popup/basic.uvue'
+import BlCheckerBasic from '@/components/examples/bl-checker/basic.uvue'
+import BlTourBasic from '@/components/examples/bl-tour/basic.uvue'
+import BlFilterBasic from '@/components/examples/bl-filter/basic.uvue'
+import BlCheckerPopupBasic from '@/components/examples/bl-checker-popup/basic.uvue'
+import BlCardLayoutBasic from '@/components/examples/bl-card-layout/basic.uvue'
+import BlBottomBarBasic from '@/components/examples/bl-bottom-bar/basic.uvue'
+import BlThemeBasic from '@/components/examples/bl-theme/basic.uvue'
+import BlThemeProviderBasic from '@/components/examples/bl-theme-provider/basic.uvue'
+import BlThemeRootBasic from '@/components/examples/bl-theme-root/basic.uvue'
+import BlI18nProviderBasic from '@/components/examples/bl-i18n-provider/basic.uvue'
+import BlErrorCaptureBasic from '@/components/examples/bl-error-capture/basic.uvue'
+import BlPageStyleBasic from '@/components/examples/bl-page-style/basic.uvue'
+import BlShareDialogBasic from '@/components/examples/bl-share-dialog/basic.uvue'
+import BlShareAppMessageBasic from '@/components/examples/bl-share-app-message/basic.uvue'
+import BlPreviewContextBasic from '@/components/examples/bl-preview-context/basic.uvue'
+import BlMpCustomTabbarBasic from '@/components/examples/bl-mp-custom-tabbar/basic.uvue'
+import BlPortalBasic from '@/components/examples/bl-portal/basic.uvue'
+import BlNotificationBasic from '@/components/examples/bl-notification/basic.uvue'
+import BlMessageBasic from '@/components/examples/bl-message/basic.uvue'
+import BlPosterPainterBasic from '@/components/examples/bl-poster-painter/basic.uvue'
+import BlCustomNavigationBarBasic from '@/components/examples/bl-custom-navigation-bar/basic.uvue'
+
+const props = defineProps<{
+  examplePath?: string
+}>()
+
+// 组件映射表（自动注册所有示例组件）
+// 格式: '组件名/示例名': 组件实例
+const componentMap: Record<string, any> = {
+  // bl-button 示例
+  'bl-button/basic': BlButtonBasic,
+  'bl-button/types': BlButtonTypes,
+  'bl-button/sizes': BlButtonSizes,
+  
+  // bl-avatar 示例
+  'bl-avatar/basic': BlAvatarBasic,
+  
+  // bl-badge 示例
+  'bl-badge/basic': BlBadgeBasic,
+  
+  // bl-input 示例
+  'bl-input/basic': BlInputBasic,
+  'bl-input/types': BlInputTypes,
+  'bl-input/disabled': BlInputDisabled,
+  
+  // bl-switch 示例
+  'bl-switch/basic': BlSwitchBasic,
+  
+  // bl-text 示例
+  'bl-text/basic': BlTextBasic,
+  
+  // bl-tag 示例
+  'bl-tag/basic': BlTagBasic,
+  
+  // bl-cell 示例
+  'bl-cell/basic': BlCellBasic,
+  
+  // bl-divider 示例
+  'bl-divider/basic': BlDividerBasic,
+  
+  // bl-image 示例
+  'bl-image/basic': BlImageBasic,
+  
+  // bl-checkbox 示例
+  'bl-checkbox/basic': BlCheckboxBasic,
+  
+  // bl-radio 示例
+  'bl-radio/basic': BlRadioBasic,
+  
+  // bl-rate 示例
+  'bl-rate/basic': BlRateBasic,
+  
+  // bl-progress 示例
+  'bl-progress/basic': BlProgressBasic,
+  
+  // bl-loading 示例
+  'bl-loading/basic': BlLoadingBasic,
+  
+  // bl-empty 示例
+  'bl-empty/basic': BlEmptyBasic,
+  
+  // bl-icon 示例
+  'bl-icon/basic': BlIconBasic,
+  
+  // bl-view 示例
+  'bl-view/basic': BlViewBasic,
+  
+  // bl-alert 示例
+  'bl-alert/basic': BlAlertBasic,
+  
+  // bl-textarea 示例
+  'bl-textarea/basic': BlTextareaBasic,
+  
+  // bl-slider 示例
+  'bl-slider/basic': BlSliderBasic,
+  
+  // bl-number-input 示例
+  'bl-number-input/basic': BlNumberInputBasic,
+  
+  // bl-flex 示例
+  'bl-flex/basic': BlFlexBasic,
+  
+  // bl-gap 示例
+  'bl-gap/basic': BlGapBasic,
+  
+  // bl-result 示例
+  'bl-result/basic': BlResultBasic,
+  
+  // bl-skeleton 示例
+  'bl-skeleton/basic': BlSkeletonBasic,
+  
+  // bl-collapse 示例
+  'bl-collapse/basic': BlCollapseBasic,
+  
+  // bl-tabs 示例
+  'bl-tabs/basic': BlTabsBasic,
+  
+  // bl-pagination 示例
+  'bl-pagination/basic': BlPaginationBasic,
+  
+  // bl-segmented 示例
+  'bl-segmented/basic': BlSegmentedBasic,
+  
+  // bl-amount 示例
+  'bl-amount/basic': BlAmountBasic,
+  
+  // bl-statistic 示例
+  'bl-statistic/basic': BlStatisticBasic,
+  
+  // bl-popup 示例
+  'bl-popup/basic': BlPopupBasic,
+  
+  // bl-dialog 示例
+  'bl-dialog/basic': BlDialogBasic,
+  
+  // bl-drawer 示例
+  'bl-drawer/basic': BlDrawerBasic,
+  
+  // bl-notice-bar 示例
+  'bl-notice-bar/basic': BlNoticeBarBasic,
+  
+  // bl-back-top 示例
+  'bl-back-top/basic': BlBackTopBasic,
+  
+  // bl-search-bar 示例
+  'bl-search-bar/basic': BlSearchBarBasic,
+  
+  // bl-count-down 示例
+  'bl-count-down/basic': BlCountDownBasic,
+  
+  // bl-timeline 示例
+  'bl-timeline/basic': BlTimelineBasic,
+  
+  // bl-grid 示例
+  'bl-grid/basic': BlGridBasic,
+  
+  // bl-swiper 示例
+  'bl-swiper/basic': BlSwiperBasic,
+  
+  // bl-steps 示例
+  'bl-steps/basic': BlStepsBasic,
+  
+  // bl-descriptions 示例
+  'bl-descriptions/basic': BlDescriptionsBasic,
+  
+  // bl-space 示例
+  'bl-space/basic': BlSpaceBasic,
+  
+  // bl-tooltip 示例
+  'bl-tooltip/basic': BlTooltipBasic,
+  
+  // bl-popover 示例
+  'bl-popover/basic': BlPopoverBasic,
+  
+  // bl-popconfirm 示例
+  'bl-popconfirm/basic': BlPopconfirmBasic,
+  
+  // bl-uploader 示例
+  'bl-uploader/basic': BlUploaderBasic,
+  
+  // bl-check-tag 示例
+  'bl-check-tag/basic': BlCheckTagBasic,
+  
+  // bl-float-button 示例
+  'bl-float-button/basic': BlFloatButtonBasic,
+  
+  // bl-qrcode 示例
+  'bl-qrcode/basic': BlQrcodeBasic,
+  
+  // bl-row 示例
+  'bl-row/basic': BlRowBasic,
+  
+  // bl-tree 示例
+  'bl-tree/basic': BlTreeBasic,
+  
+  // bl-transfer 示例
+  'bl-transfer/basic': BlTransferBasic,
+  
+  // bl-calendar 示例
+  'bl-calendar/basic': BlCalendarBasic,
+  
+  // bl-table 示例
+  'bl-table/basic': BlTableBasic,
+  
+  // bl-video 示例
+  'bl-video/basic': BlVideoBasic,
+  
+  // bl-watermark 示例
+  'bl-watermark/basic': BlWatermarkBasic,
+  
+  // bl-form 示例
+  'bl-form/basic': BlFormBasic,
+  
+  // bl-checkbox-group 示例
+  'bl-checkbox-group/basic': BlCheckboxGroupBasic,
+  
+  // bl-radio-group 示例
+  'bl-radio-group/basic': BlRadioGroupBasic,
+  
+  // bl-sort-tag 示例
+  'bl-sort-tag/basic': BlSortTagBasic,
+  
+  // bl-spinner 示例
+  'bl-spinner/basic': BlSpinnerBasic,
+  
+  // bl-tabbar 示例
+  'bl-tabbar/basic': BlTabbarBasic,
+  
+  // bl-menu 示例
+  'bl-menu/basic': BlMenuBasic,
+  
+  // bl-autocomplete 示例
+  'bl-autocomplete/basic': BlAutocompleteBasic,
+  
+  // bl-scroll-view 示例
+  'bl-scroll-view/basic': BlScrollViewBasic,
+  
+  // bl-modal 示例
+  'bl-modal/basic': BlModalBasic,
+  
+  // bl-list-view 示例
+  'bl-list-view/basic': BlListViewBasic,
+  
+  // bl-hairline 示例
+  'bl-hairline/basic': BlHairlineBasic,
+  
+  // bl-page 示例
+  'bl-page/basic': BlPageBasic,
+  
+  // bl-treeselect 示例
+  'bl-treeselect/basic': BlTreeselectBasic,
+  
+  // bl-picker-selector 示例
+  'bl-picker-selector/basic': BlPickerSelectorBasic,
+  
+  // bl-picker-date 示例
+  'bl-picker-date/basic': BlPickerDateBasic,
+  
+  // bl-picker-time 示例
+  'bl-picker-time/basic': BlPickerTimeBasic,
+  
+  // bl-picker-multi-selector 示例
+  'bl-picker-multi-selector/basic': BlPickerMultiSelectorBasic,
+  
+  // bl-picker-cascader-selector 示例
+  'bl-picker-cascader-selector/basic': BlPickerCascaderSelectorBasic,
+  
+  // bl-checkbox-popup 示例
+  'bl-checkbox-popup/basic': BlCheckboxPopupBasic,
+  
+  // bl-radio-popup 示例
+  'bl-radio-popup/basic': BlRadioPopupBasic,
+  
+  // bl-checker 示例
+  'bl-checker/basic': BlCheckerBasic,
+  
+  // bl-tour 示例
+  'bl-tour/basic': BlTourBasic,
+  
+  // bl-filter 示例
+  'bl-filter/basic': BlFilterBasic,
+  
+  // bl-checker-popup 示例
+  'bl-checker-popup/basic': BlCheckerPopupBasic,
+  
+  // bl-card-layout 示例
+  'bl-card-layout/basic': BlCardLayoutBasic,
+  
+  // bl-bottom-bar 示例
+  'bl-bottom-bar/basic': BlBottomBarBasic,
+  
+  // bl-theme 示例
+  'bl-theme/basic': BlThemeBasic,
+  
+  // bl-theme-provider 示例
+  'bl-theme-provider/basic': BlThemeProviderBasic,
+  
+  // bl-theme-root 示例
+  'bl-theme-root/basic': BlThemeRootBasic,
+  
+  // bl-i18n-provider 示例
+  'bl-i18n-provider/basic': BlI18nProviderBasic,
+  
+  // bl-error-capture 示例
+  'bl-error-capture/basic': BlErrorCaptureBasic,
+  
+  // bl-page-style 示例
+  'bl-page-style/basic': BlPageStyleBasic,
+  
+  // bl-share-dialog 示例
+  'bl-share-dialog/basic': BlShareDialogBasic,
+  
+  // bl-share-app-message 示例
+  'bl-share-app-message/basic': BlShareAppMessageBasic,
+  
+  // bl-preview-context 示例
+  'bl-preview-context/basic': BlPreviewContextBasic,
+  
+  // bl-mp-custom-tabbar 示例
+  'bl-mp-custom-tabbar/basic': BlMpCustomTabbarBasic,
+  
+  // bl-portal 示例
+  'bl-portal/basic': BlPortalBasic,
+  
+  // bl-notification 示例
+  'bl-notification/basic': BlNotificationBasic,
+  
+  // bl-message 示例
+  'bl-message/basic': BlMessageBasic,
+  
+  // bl-poster-painter 示例
+  'bl-poster-painter/basic': BlPosterPainterBasic,
+  
+  // bl-custom-navigation-bar 示例
+  'bl-custom-navigation-bar/basic': BlCustomNavigationBarBasic,
+}
+
+// 根据路径获取组件
+const componentInstance = computed(() => {
+  const path = props.examplePath
+  if (!path) return null
+  
+  const component = componentMap[path]
+  if (!component) {
+    console.warn(`[preview-renderer] Component not found: ${path}`)
+    console.log(`[preview-renderer] Available components:`, Object.keys(componentMap).join(', '))
+  }
+  return component || null
+})
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.preview-renderer-simple {
+  width: 100%;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-info {
+  padding: $vp-spacing-lg;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $vp-spacing-sm;
+}
+
+.info-text {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-2;
+}
+
+.info-hint {
+  font-size: $vp-font-size-xs;
+  color: $vp-c-text-3;
+}
+</style>

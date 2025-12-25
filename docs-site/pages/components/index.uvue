@@ -1,0 +1,417 @@
+<template>
+  <doc-layout :sidebar-groups="sidebarGroups" :show-sidebar="true" :show-toc="false">
+    <view class="components-content">
+      <view class="page-header">
+        <text class="page-title">组件索引</text>
+        <text class="page-description">Belay-Unix 组件库提供了 107+ 个高质量组件，覆盖基础、表单、反馈、展示、导航等场景。</text>
+      </view>
+      
+      <view class="content">
+        <!-- 目录导航 -->
+        <view class="toc-section">
+          <text class="toc-title">📋 目录</text>
+          <view class="toc-links">
+            <text 
+              v-for="category in categories" 
+              :key="category.id"
+              class="toc-link"
+              @click="scrollToCategory(category.id)"
+            >
+              {{ category.name }}
+            </text>
+          </view>
+        </view>
+
+        <!-- 组件分类 -->
+        <view 
+          class="category-section" 
+          v-for="category in categories" 
+          :key="category.id"
+          :id="category.id"
+        >
+          <view class="category-header">
+            <text class="category-title">
+              <text class="category-icon">{{ category.icon }}</text>
+              {{ category.name }}（{{ category.components.length }}个）
+            </text>
+            <text class="category-desc">{{ category.description }}</text>
+          </view>
+          
+          <view class="component-list">
+            <view 
+              class="component-item"
+              v-for="component in category.components"
+              :key="component.name"
+            >
+              <view class="component-info">
+                <text class="component-name">{{ component.name }}</text>
+                <text class="component-desc">{{ component.description || formatComponentName(component.name) }}</text>
+              </view>
+              <button class="view-btn" @click="goToDetail(component.name)">查看文档</button>
+            </view>
+          </view>
+        </view>
+
+        <!-- 组件统计 -->
+        <view class="stats-section">
+          <text class="section-title">📊 组件统计</text>
+          <view class="stats-list">
+            <view class="stats-item" v-for="category in categories" :key="category.id">
+              <text class="stats-label">{{ category.name }}</text>
+              <text class="stats-value">{{ category.components.length }}</text>
+            </view>
+            <view class="stats-item total-row">
+              <text class="stats-label">总计</text>
+              <text class="stats-value">{{ totalComponents }}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </doc-layout>
+</template>
+
+<script setup lang="uts">
+import { ref, computed, onMounted } from 'vue'
+import { getAllComponents, componentCategories, type ComponentDoc } from '@/utils/doc-loader'
+import { componentsSidebar, type SidebarGroup } from '@/utils/sidebar-config'
+
+const sidebarGroups = computed(() => {
+  return componentsSidebar
+})
+
+const allComponents = ref<ComponentDoc[]>([])
+const categories = computed(() => {
+  const cats = [
+    { 
+      id: 'basic', 
+      name: '基础组件', 
+      icon: '🎨',
+      description: '基础组件是构建应用的基础，提供最常用的 UI 元素。',
+      components: [] as ComponentDoc[]
+    },
+    { 
+      id: 'form', 
+      name: '表单组件', 
+      icon: '📝',
+      description: '表单组件用于数据输入和用户交互。',
+      components: [] as ComponentDoc[]
+    },
+    { 
+      id: 'feedback', 
+      name: '反馈组件', 
+      icon: '💬',
+      description: '反馈组件用于向用户展示操作结果和状态。',
+      components: [] as ComponentDoc[]
+    },
+    { 
+      id: 'display', 
+      name: '展示组件', 
+      icon: '🎭',
+      description: '展示组件用于展示数据和信息。',
+      components: [] as ComponentDoc[]
+    },
+    { 
+      id: 'navigation', 
+      name: '导航组件', 
+      icon: '🧭',
+      description: '导航组件用于页面导航和路由。',
+      components: [] as ComponentDoc[]
+    },
+    { 
+      id: 'layout', 
+      name: '布局组件', 
+      icon: '📐',
+      description: '布局组件用于页面布局和结构。',
+      components: [] as ComponentDoc[]
+    },
+    { 
+      id: 'other', 
+      name: '其他组件', 
+      icon: '🔧',
+      description: '其他功能组件和工具组件。',
+      components: [] as ComponentDoc[]
+    }
+  ]
+
+  // 按分类分组组件
+  allComponents.value.forEach(component => {
+    const catMap: Record<string, string> = {
+      '基础组件': 'basic',
+      '表单组件': 'form',
+      '反馈组件': 'feedback',
+      '展示组件': 'display',
+      '导航组件': 'navigation',
+      '布局组件': 'layout',
+      '其他组件': 'other'
+    }
+    const catId = catMap[component.category]
+    const catIndex = cats.findIndex(cat => cat.id === catId)
+    if (catIndex != -1) {
+      cats[catIndex].components.push(component)
+    }
+  })
+
+  return cats
+})
+
+const totalComponents = computed(() => {
+  return categories.value.reduce((sum, cat) => sum + cat.components.length, 0)
+})
+
+onMounted(() => {
+  allComponents.value = getAllComponents()
+  
+  // 如果有分类参数，滚动到对应分类
+  // #ifdef APP || H5
+  const pages = getCurrentPages()
+  if (pages != null && pages.length > 0) {
+    const currentPage = pages[pages.length - 1]
+    const options = currentPage.options || {}
+    const category = options.category as string
+    if (category) {
+      const catMap: Record<string, string> = {
+        '基础组件': 'basic',
+        '表单组件': 'form',
+        '反馈组件': 'feedback',
+        '展示组件': 'display',
+        '导航组件': 'navigation',
+        '布局组件': 'layout',
+        '其他组件': 'other'
+      }
+      const catId = catMap[category]
+      if (catId) {
+        setTimeout(() => scrollToCategory(catId), 100)
+      }
+    }
+  }
+  // #endif
+})
+
+const formatComponentName = (name: string): string => {
+  return name.replace('bl-', '').replace(/-/g, ' ')
+}
+
+const scrollToCategory = (id: string) => {
+  // uni-app 中需要使用 uni.createSelectorQuery 来滚动
+  uni.createSelectorQuery().select(`#${id}`).boundingClientRect((data: any) => {
+    if (data) {
+      uni.pageScrollTo({
+        scrollTop: data.top,
+        duration: 300
+      })
+    }
+  }).exec()
+}
+
+const goToDetail = (componentName: string) => {
+  uni.navigateTo({
+    url: `/pages/component-detail/index?name=${encodeURIComponent(componentName)}`
+  })
+}
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.components-content {
+  width: 100%;
+}
+
+.page-header {
+  margin-bottom: $vp-spacing-xl;
+}
+
+.page-title {
+  font-size: $vp-font-size-3xl;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+  margin-bottom: $vp-spacing-sm;
+  display: block;
+}
+
+.page-description {
+  font-size: $vp-font-size-base;
+  color: $vp-c-text-2;
+  line-height: 1.7;
+  display: block;
+}
+
+.content {
+  width: 100%;
+}
+
+.toc-section {
+  background: $vp-c-bg;
+  padding: $vp-spacing-lg;
+  border-radius: $vp-border-radius-lg;
+  margin-bottom: $vp-spacing-xl;
+  border: 1px solid $vp-c-divider;
+}
+
+.toc-title {
+  font-size: $vp-font-size-xl;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+  margin-bottom: $vp-spacing-md;
+  display: block;
+}
+
+.toc-links {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: $vp-spacing-sm;
+}
+
+.toc-link {
+  color: $vp-c-brand;
+  padding: $vp-spacing-xs $vp-spacing-sm;
+  border-radius: $vp-border-radius-sm;
+  font-size: $vp-font-size-sm;
+  transition: all $vp-transition-base;
+  /* #ifdef H5 */
+  cursor: pointer;
+  &:hover {
+    background: $vp-c-bg-soft;
+  }
+  /* #endif */
+}
+
+.category-section {
+  background: $vp-c-bg;
+  padding: $vp-spacing-xl;
+  border-radius: $vp-border-radius-lg;
+  margin-bottom: $vp-spacing-xl;
+  border: 1px solid $vp-c-divider;
+}
+
+.category-header {
+  margin-bottom: $vp-spacing-lg;
+}
+
+.category-title {
+  font-size: $vp-font-size-2xl;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+  margin-bottom: $vp-spacing-sm;
+  display: block;
+}
+
+.category-icon {
+  margin-right: $vp-spacing-sm;
+}
+
+.category-desc {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-2;
+  line-height: 1.6;
+  display: block;
+}
+
+.component-list {
+  display: flex;
+  flex-direction: column;
+  gap: $vp-spacing-sm;
+}
+
+.component-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: $vp-spacing-md;
+  border-bottom: 1px solid $vp-c-divider;
+  transition: background-color $vp-transition-base;
+  /* #ifdef H5 */
+  &:hover {
+    background-color: $vp-c-bg-soft;
+  }
+  /* #endif */
+}
+
+.component-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.component-name {
+  background: $vp-c-bg-soft;
+  padding: $vp-spacing-xs $vp-spacing-sm;
+  border-radius: $vp-border-radius-sm;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: $vp-font-size-xs;
+  color: #e83e8c;
+  margin-bottom: $vp-spacing-sm;
+  display: inline-block;
+}
+
+.component-desc {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-2;
+  display: block;
+}
+
+.view-btn {
+  padding: $vp-spacing-xs $vp-spacing-md;
+  background: $vp-c-brand;
+  color: #ffffff;
+  border: none;
+  border-radius: $vp-border-radius-sm;
+  font-size: $vp-font-size-sm;
+  transition: all $vp-transition-base;
+  /* #ifdef H5 */
+  cursor: pointer;
+  &:hover {
+    background: $vp-c-brand-light;
+  }
+  /* #endif */
+}
+
+.stats-section {
+  background: $vp-c-bg;
+  padding: $vp-spacing-xl;
+  border-radius: $vp-border-radius-lg;
+  margin-bottom: $vp-spacing-xl;
+  border: 1px solid $vp-c-divider;
+}
+
+.section-title {
+  font-size: $vp-font-size-2xl;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+  margin-bottom: $vp-spacing-lg;
+  display: block;
+}
+
+.stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: $vp-spacing-sm;
+}
+
+.stats-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: $vp-spacing-sm $vp-spacing-md;
+  border-bottom: 1px solid $vp-c-divider;
+}
+
+.total-row {
+  background: $vp-c-bg-soft;
+  font-weight: $vp-font-weight-semibold;
+}
+
+.stats-label {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-1;
+}
+
+.stats-value {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-1;
+}
+</style>
+

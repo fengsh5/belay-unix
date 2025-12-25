@@ -1,0 +1,22 @@
+<template>
+  <view class="example-basic">
+    <bl-timeline>
+      <bl-timeline-item>
+        <text>步骤1：开始</text>
+      </bl-timeline-item>
+      <bl-timeline-item>
+        <text>步骤2：进行中</text>
+      </bl-timeline-item>
+      <bl-timeline-item>
+        <text>步骤3：完成</text>
+      </bl-timeline-item>
+    </bl-timeline>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

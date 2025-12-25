@@ -1,0 +1,25 @@
+<template>
+  <view class="example-basic">
+    <bl-count-down :future-time="futureTime"></bl-count-down>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+
+// 设置未来时间（当前时间 + 1小时）
+const futureTime = computed(() => {
+  const now = Date.now()
+  return now + 3600000 // 1小时后
+})
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

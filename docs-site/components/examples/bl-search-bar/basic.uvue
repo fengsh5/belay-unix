@@ -1,0 +1,12 @@
+<template>
+  <view class="example-basic">
+    <bl-search-bar placeholder="请输入搜索关键词"></bl-search-bar>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

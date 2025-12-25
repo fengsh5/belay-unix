@@ -1,0 +1,16 @@
+<template>
+  <view class="example-basic">
+    <bl-steps :active="1">
+      <bl-step title="步骤1"></bl-step>
+      <bl-step title="步骤2"></bl-step>
+      <bl-step title="步骤3"></bl-step>
+    </bl-steps>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

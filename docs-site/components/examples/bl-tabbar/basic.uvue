@@ -1,0 +1,29 @@
+<template>
+  <view class="example-basic">
+    <bl-tabbar :value="currentIndex" @change="handleChange" :fixed="false">
+      <bl-tab-button title="首页" icon="home"></bl-tab-button>
+      <bl-tab-button title="分类" icon="category"></bl-tab-button>
+      <bl-tab-button title="购物车" icon="cart"></bl-tab-button>
+      <bl-tab-button title="我的" icon="user"></bl-tab-button>
+    </bl-tabbar>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const currentIndex = ref(0)
+
+const handleChange = (index: number) => {
+  currentIndex.value = index
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  position: relative;
+  min-height: 200px;
+}
+</style>
+

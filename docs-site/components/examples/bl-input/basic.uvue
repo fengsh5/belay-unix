@@ -1,0 +1,15 @@
+<template>
+  <view class="example-basic">
+    <bl-input placeholder="请输入内容"></bl-input>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>
+

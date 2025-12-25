@@ -1,0 +1,439 @@
+<template>
+  <view class="markdown-renderer">
+    <view v-for="(block, index) in blocks" :key="index" class="markdown-block">
+      <!-- 标题 -->
+      <text 
+        v-if="block.type === 'heading'"
+        :class="[`markdown-h${block.level}`, { 'markdown-heading': true }]"
+        :id="block.id"
+      >
+        {{ block.text }}
+      </text>
+      
+      <!-- 段落 -->
+      <view v-else-if="block.type === 'paragraph'" class="markdown-p">
+        <text v-for="(part, partIndex) in parseInline(block.text || '')" :key="partIndex" :class="part.class">
+          {{ part.text }}
+        </text>
+      </view>
+      
+      <!-- 代码块 -->
+      <code-highlight 
+        v-else-if="block.type === 'code'"
+        :code="block.code || ''"
+        :language="block.language"
+      ></code-highlight>
+      
+      <!-- 列表 -->
+      <view v-else-if="block.type === 'list'" class="markdown-list">
+        <view 
+          v-for="(item, itemIndex) in block.items" 
+          :key="itemIndex"
+          class="markdown-list-item"
+        >
+          <text class="list-marker">{{ block.ordered ? `${itemIndex + 1}.` : '•' }}</text>
+          <text class="list-content">{{ item }}</text>
+        </view>
+      </view>
+      
+      <!-- 引用 -->
+      <view v-else-if="block.type === 'blockquote'" class="markdown-blockquote">
+        <text class="blockquote-text">{{ block.text }}</text>
+      </view>
+      
+      <!-- 分隔线 -->
+      <view v-else-if="block.type === 'hr'" class="markdown-hr"></view>
+      
+      <!-- 表格 -->
+      <view v-else-if="block.type === 'table'" class="markdown-table">
+        <view class="table-wrapper">
+          <view class="table-header">
+            <view 
+              v-for="(header, headerIndex) in block.headers" 
+              :key="headerIndex"
+              class="table-cell table-cell-header"
+            >
+              <text 
+                v-for="(part, partIndex) in parseInline(header || '')" 
+                :key="partIndex" 
+                :class="['table-cell-text', part.class]"
+              >
+                {{ part.text }}
+              </text>
+            </view>
+          </view>
+          <view 
+            v-for="(row, rowIndex) in block.rows" 
+            :key="rowIndex"
+            class="table-row"
+          >
+            <view 
+              v-for="(cell, cellIndex) in row" 
+              :key="cellIndex"
+              class="table-cell"
+            >
+              <text 
+                v-for="(part, partIndex) in parseInline(cell || '')" 
+                :key="partIndex" 
+                :class="['table-cell-text', part.class]"
+              >
+                {{ part.text }}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 示例预览 -->
+      <example-preview
+        v-else-if="block.type === 'example'"
+        :code="block.code || ''"
+        :title="block.title"
+        :description="block.description"
+        :editable="block.editable"
+        :example-path="block.examplePath"
+      ></example-preview>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref, watch } from 'vue'
+import { parseMarkdown, type MarkdownBlock } from '@/utils/markdown-parser'
+
+const props = defineProps<{
+  content: string
+}>()
+
+const blocks = ref<MarkdownBlock[]>([])
+
+watch(() => props.content, () => {
+  if (props.content) {
+    blocks.value = parseMarkdown(props.content)
+  } else {
+    blocks.value = []
+  }
+}, { immediate: true })
+
+type InlinePart = {
+  text: string
+  class: string
+}
+
+function parseInline(text: string): InlinePart[] {
+  if (!text) return []
+  
+  const parts: InlinePart[] = []
+  let remaining = text
+  let pos = 0
+  
+  while (pos < remaining.length) {
+    // 匹配内联代码 `code`
+    const codeMatch = remaining.substring(pos).match(/^`([^`]+)`/)
+    if (codeMatch != null) {
+      if (pos > 0) {
+        parts.push({ text: remaining.substring(0, pos), class: 'inline-text' })
+      }
+      parts.push({ text: codeMatch[1], class: 'inline-code' })
+      remaining = remaining.substring(pos + codeMatch[0].length)
+      pos = 0
+      continue
+    }
+    
+    // 匹配粗体 **text** 或 __text__
+    const boldMatch = remaining.substring(pos).match(/^(\*\*|__)([^*_]+)\1/)
+    if (boldMatch != null) {
+      if (pos > 0) {
+        parts.push({ text: remaining.substring(0, pos), class: 'inline-text' })
+      }
+      parts.push({ text: boldMatch[2], class: 'inline-bold' })
+      remaining = remaining.substring(pos + boldMatch[0].length)
+      pos = 0
+      continue
+    }
+    
+    // 匹配斜体 *text* 或 _text_
+    const italicMatch = remaining.substring(pos).match(/^(\*|_)([^*_\n]+)\1/)
+    if (italicMatch != null && !remaining.substring(pos).startsWith('**') && !remaining.substring(pos).startsWith('__')) {
+      if (pos > 0) {
+        parts.push({ text: remaining.substring(0, pos), class: 'inline-text' })
+      }
+      parts.push({ text: italicMatch[2], class: 'inline-italic' })
+      remaining = remaining.substring(pos + italicMatch[0].length)
+      pos = 0
+      continue
+    }
+    
+    // 匹配链接 [text](url)
+    const linkMatch = remaining.substring(pos).match(/^\[([^\]]+)\]\(([^)]+)\)/)
+    if (linkMatch != null) {
+      if (pos > 0) {
+        parts.push({ text: remaining.substring(0, pos), class: 'inline-text' })
+      }
+      parts.push({ text: linkMatch[1], class: 'inline-link' })
+      remaining = remaining.substring(pos + linkMatch[0].length)
+      pos = 0
+      continue
+    }
+    
+    pos++
+  }
+  
+  if (remaining.length > 0) {
+    parts.push({ text: remaining, class: 'inline-text' })
+  }
+  
+  return parts.length > 0 ? parts : [{ text, class: 'inline-text' }]
+}
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.markdown-renderer {
+  line-height: 1.7;
+  color: $vp-c-text-1;
+  font-size: $vp-font-size-base;
+}
+
+.markdown-block {
+  margin-bottom: $vp-spacing-md;
+}
+
+/* 标题样式 */
+.markdown-heading {
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+  margin-top: $vp-spacing-xl;
+  margin-bottom: $vp-spacing-md;
+  display: block;
+  scroll-margin-top: 80px;
+}
+
+.markdown-h1 {
+  font-size: $vp-font-size-3xl;
+  border-bottom: 1px solid $vp-c-divider;
+  padding-bottom: $vp-spacing-sm;
+  margin-top: 0;
+}
+
+.markdown-h2 {
+  font-size: $vp-font-size-2xl;
+  border-bottom: 1px solid $vp-c-divider;
+  padding-bottom: $vp-spacing-sm;
+  margin-top: $vp-spacing-2xl;
+}
+
+.markdown-h3 {
+  font-size: $vp-font-size-xl;
+  margin-top: $vp-spacing-xl;
+}
+
+.markdown-h4 {
+  font-size: $vp-font-size-lg;
+  margin-top: $vp-spacing-lg;
+}
+
+.markdown-h5 {
+  font-size: $vp-font-size-base;
+  margin-top: $vp-spacing-md;
+}
+
+.markdown-h6 {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-3;
+  margin-top: $vp-spacing-md;
+}
+
+/* 段落 */
+.markdown-p {
+  font-size: $vp-font-size-base;
+  color: $vp-c-text-1;
+  margin-bottom: $vp-spacing-md;
+  line-height: 1.7;
+  display: block;
+}
+
+.inline-text {
+  color: $vp-c-text-1;
+}
+
+.inline-code {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  background: $vp-c-bg-soft;
+  color: #e83e8c;
+  padding: 2px 6px;
+  border-radius: $vp-border-radius-sm;
+  margin: 0 2px;
+}
+
+.inline-bold {
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+}
+
+.inline-italic {
+  font-style: italic;
+  color: $vp-c-text-1;
+}
+
+.inline-link {
+  color: #0969da;
+  text-decoration: none;
+  transition: color $vp-transition-base;
+  /* #ifdef H5 */
+  cursor: pointer;
+  /* #endif */
+}
+
+.inline-link:active {
+  color: #0550ae;
+  text-decoration: underline;
+}
+
+/* 代码块 */
+.markdown-code-block {
+  margin: 16px 0;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f6f8fa;
+}
+
+.code-header {
+  padding: 8px 16px;
+  background: #eaeef2;
+  border-bottom: 1px solid #d0d7de;
+}
+
+.code-language {
+  font-size: 12px;
+  color: #656d76;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.code-content {
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.code-text {
+  font-size: 14px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  color: #24292f;
+  white-space: pre;
+  word-break: break-all;
+  display: block;
+}
+
+/* 列表 */
+.markdown-list {
+  margin: $vp-spacing-md 0;
+  padding-left: 0;
+}
+
+.markdown-list-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-bottom: $vp-spacing-sm;
+  padding-left: 0;
+}
+
+.list-marker {
+  margin-right: $vp-spacing-sm;
+  color: $vp-c-text-3;
+  flex-shrink: 0;
+}
+
+.list-content {
+  flex: 1;
+  font-size: $vp-font-size-base;
+  color: $vp-c-text-1;
+  line-height: 1.7;
+}
+
+/* 引用 */
+.markdown-blockquote {
+  padding: 0 $vp-spacing-md;
+  margin: $vp-spacing-md 0;
+  border-left: 4px solid $vp-c-divider;
+  background: $vp-c-bg-soft;
+  border-radius: $vp-border-radius-sm;
+}
+
+.blockquote-text {
+  font-size: $vp-font-size-base;
+  color: $vp-c-text-2;
+  font-style: italic;
+  display: block;
+  padding: $vp-spacing-sm 0;
+  line-height: 1.7;
+}
+
+/* 分隔线 */
+.markdown-hr {
+  height: 1px;
+  background: $vp-c-divider;
+  margin: $vp-spacing-xl 0;
+  border: none;
+}
+
+/* 表格 */
+.markdown-table {
+  margin: $vp-spacing-md 0;
+  overflow-x: auto;
+}
+
+.table-wrapper {
+  width: 100%;
+  border: 1px solid $vp-c-divider;
+  border-radius: $vp-border-radius-md;
+  overflow: hidden;
+  background: $vp-c-bg;
+}
+
+.table-header {
+  display: flex;
+  flex-direction: row;
+  background: $vp-c-bg-soft;
+  border-bottom: 2px solid $vp-c-divider;
+}
+
+.table-row {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid $vp-c-divider;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-cell {
+  flex: 1;
+  padding: $vp-spacing-sm $vp-spacing-md;
+  min-width: 0;
+  border-right: 1px solid $vp-c-divider;
+}
+
+.table-cell:last-child {
+  border-right: none;
+}
+
+.table-cell-header {
+  background: $vp-c-bg-soft;
+  font-weight: $vp-font-weight-semibold;
+}
+
+.table-cell-text {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-1;
+  line-height: 1.6;
+  word-break: break-word;
+  display: block;
+}
+
+</style>
+

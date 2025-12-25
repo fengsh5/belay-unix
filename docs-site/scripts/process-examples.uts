@@ -1,0 +1,34 @@
+/**
+ * 示例组件处理脚本
+ * 用于批量处理 README.md 中的示例代码，添加 example: 标记并创建对应的示例组件文件
+ */
+
+// 需要处理的组件列表（常用组件优先）
+const componentsToProcess = [
+  'bl-badge',
+  'bl-input',
+  'bl-switch',
+  'bl-text',
+  'bl-image',
+  'bl-cell',
+  'bl-divider',
+  'bl-tag',
+  'bl-checkbox',
+  'bl-radio',
+  'bl-rate',
+  'bl-progress',
+  'bl-loading',
+  'bl-empty',
+  'bl-result',
+  'bl-skeleton',
+  'bl-collapse',
+  'bl-tabs',
+  'bl-pagination',
+  'bl-calendar'
+]
+
+// 示例命名规则：第一个示例为 basic，后续为 types, sizes, variants 等
+const exampleNames = ['basic', 'types', 'sizes', 'variants', 'custom']
+
+export { componentsToProcess, exampleNames }
+

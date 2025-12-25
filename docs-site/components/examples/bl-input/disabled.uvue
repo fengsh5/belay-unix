@@ -1,0 +1,16 @@
+<template>
+  <view class="example-disabled">
+    <bl-input disabled placeholder="禁用状态"></bl-input>
+    <bl-input readonly value="只读内容"></bl-input>
+  </view>
+</template>
+
+<style lang="scss">
+.example-disabled {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>
+

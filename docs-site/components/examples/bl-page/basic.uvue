@@ -1,0 +1,22 @@
+<template>
+  <view class="example-basic">
+    <bl-page>
+      <view class="page-content">
+        <text>这是页面内容</text>
+      </view>
+    </bl-page>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 0;
+  height: 300px;
+  position: relative;
+}
+
+.page-content {
+  padding: 20px;
+}
+</style>
+

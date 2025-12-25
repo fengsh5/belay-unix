@@ -1,0 +1,62 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "Belay-Unix 组件库",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/components/index",
+			"style": {
+				"navigationBarTitleText": "组件索引",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/component-detail/index",
+			"style": {
+				"navigationBarTitleText": "组件详情",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/guide/index",
+			"style": {
+				"navigationBarTitleText": "使用指南"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "Belay-Unix 组件库",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^bl-collapse-panel$": "@/../uni_modules/belay-unix/components/bl-collapse/panel.uvue",
+			"^bl-tab-panel$": "@/../uni_modules/belay-unix/components/bl-tab-panel/index.uvue",
+			"^bl-timeline-item$": "@/../uni_modules/belay-unix/components/bl-timeline/item.uvue",
+			"^bl-step$": "@/../uni_modules/belay-unix/components/bl-step/index.uvue",
+			"^bl-grid-item$": "@/../uni_modules/belay-unix/components/bl-grid-item/index.uvue",
+			"^bl-descriptions-item$": "@/../uni_modules/belay-unix/components/bl-descriptions/item.uvue",
+			"^bl-tab-button$": "@/../uni_modules/belay-unix/components/bl-tab-button/index.uvue",
+			"^bl-menu-item$": "@/../uni_modules/belay-unix/components/bl-menu/item.uvue",
+			"^bl-tree-node$": "@/../uni_modules/belay-unix/components/bl-tree/node.uvue",
+			"^bl-col$": "@/../uni_modules/belay-unix/components/bl-col/index.uvue",
+			"^bl-(.*)": "@/../uni_modules/belay-unix/components/bl-$1/index.uvue",
+			"^top-navbar$": "@/components/top-navbar.uvue",
+			"^doc-sidebar$": "@/components/doc-sidebar.uvue",
+			"^doc-layout$": "@/components/doc-layout.uvue",
+			"^doc-toc$": "@/components/doc-toc.uvue",
+			"^markdown-renderer$": "@/components/markdown-renderer.uvue",
+			"^code-highlight$": "@/components/code-highlight.uvue",
+			"^example-preview$": "@/components/example-preview.uvue",
+			"^preview-renderer$": "@/components/preview-renderer.uvue",
+			"^component-node$": "@/components/component-node.uvue"
+		}
+	}
+}

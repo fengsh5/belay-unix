@@ -1,0 +1,29 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showDialog = true">打开对话框</bl-button>
+    <bl-dialog 
+      :visible="showDialog" 
+      title="提示" 
+      message="这是一个对话框"
+      @close="showDialog = false"
+      @confirm="handleConfirm"
+    ></bl-dialog>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showDialog = ref(false)
+
+const handleConfirm = () => {
+  showDialog.value = false
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

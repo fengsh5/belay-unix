@@ -1,0 +1,207 @@
+<template>
+  <doc-layout :sidebar-groups="sidebarGroups" :show-sidebar="true" :show-toc="true" :toc-items="tocItems">
+    <view class="component-detail-content">
+      <view v-if="doc && markdownContent" class="doc-wrapper">
+        <markdown-renderer :content="markdownContent"></markdown-renderer>
+      </view>
+
+      <view class="loading" v-else-if="loading">
+        <text class="loading-text">加载中...</text>
+      </view>
+
+      <view class="error" v-else-if="error">
+        <text class="error-text">{{ error }}</text>
+      </view>
+    </view>
+  </doc-layout>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted, computed } from 'vue'
+import { loadComponentDoc, type ComponentDoc } from '@/utils/doc-loader'
+import { componentsSidebar, type SidebarGroup } from '@/utils/sidebar-config'
+
+const doc = ref<ComponentDoc | null>(null)
+const markdownContent = ref<string>('')
+const loading = ref(true)
+const error = ref<string>('')
+
+const sidebarGroups = computed(() => {
+  return componentsSidebar
+})
+
+const tocItems = computed(() => {
+  // 从 markdown 内容中提取标题作为目录
+  if (!markdownContent.value) return []
+  
+  const items: Array<{ id: string; text: string; level: number }> = []
+  const lines = markdownContent.value.split('\n')
+  
+  for (const line of lines) {
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/)
+    if (headingMatch != null) {
+      const level = headingMatch[1].length
+      const text = headingMatch[2].trim()
+      const id = text
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
+      items.push({ id, text, level })
+    }
+  }
+  
+  return items
+})
+
+onMounted(async () => {
+  // 获取组件名称
+  // #ifdef APP || H5
+  const pages = getCurrentPages()
+  let componentName: string = ''
+  if (pages != null && pages.length > 0) {
+    const currentPage = pages[pages.length - 1]
+    const options = currentPage.options || {}
+    const name = options.name as string | null
+    if (name != null && name != '') {
+      const decoded = decodeURIComponent(name)
+      if (decoded != null) {
+        componentName = decoded
+      }
+    }
+  }
+  // #endif
+  
+  if (!componentName) {
+    error.value = '未指定组件名称'
+    loading.value = false
+    return
+  }
+
+  try {
+    // 加载文档
+    const componentDoc = await loadComponentDoc(componentName)
+    if (componentDoc != null) {
+      doc.value = componentDoc
+      
+      // 加载完整的 Markdown 内容
+      await loadMarkdownContent(componentName)
+    } else {
+      error.value = '未找到组件文档'
+    }
+  } catch (e) {
+    const errorMsg = e instanceof Error ? e.message : String(e)
+    error.value = `加载文档失败: ${errorMsg}`
+  } finally {
+    loading.value = false
+  }
+})
+
+async function loadMarkdownContent(componentName: string) {
+  try {
+    // 从 uni_modules 组件目录加载 README.md
+    const path = `/uni_modules/belay-unix/components/${componentName}/README.md`
+    
+    let content = ''
+    
+    try {
+      const response = await fetch(path, {
+        headers: {
+          'Accept': 'text/plain, text/markdown, */*'
+        }
+      })
+      
+      if (response != null && response.ok) {
+        const text = await response.text()
+        // 检查返回的是否是 HTML（说明被重定向到了 index.html）
+        if (text.trim().startsWith('<!DOCTYPE') || text.includes('<html') || text.includes('<meta charset')) {
+          console.error(`路径 ${path} 返回了 HTML 而不是 Markdown`)
+          throw new Error('返回了 HTML 而不是 Markdown')
+        }
+        content = text
+        console.log(`成功加载文档: ${path}`)
+      } else if (response != null) {
+        console.warn(`无法加载文档 (${response.status}): ${path}`)
+        throw new Error(`HTTP ${response.status}`)
+      } else {
+        throw new Error('响应为空')
+      }
+    } catch (e) {
+      console.error(`加载文档失败: ${path}`, e)
+      throw e
+    }
+    
+    if (content) {
+      // 处理 Markdown 内容
+      content = processMarkdownContent(content)
+      markdownContent.value = content
+    } else {
+      // 如果没有找到 Markdown 文件，生成基础内容
+      markdownContent.value = generateBasicMarkdown(doc.value!)
+    }
+  } catch (e) {
+    console.error('加载 Markdown 失败:', e)
+    markdownContent.value = generateBasicMarkdown(doc.value!)
+  }
+}
+
+function processMarkdownContent(content: string): string {
+  // 保留 ClientOnly 和 ExamplePreview，让解析器处理
+  // 只移除 script setup 标签本身（内容已提取）
+  return content
+    .replace(/<script setup>[\s\S]*?<\/script>/g, '')
+}
+
+function generateBasicMarkdown(doc: ComponentDoc): string {
+  return `# ${doc.title}
+
+${doc.description || ''}
+
+## 📦 引入
+
+\`\`\`typescript
+import { ${doc.name.replace('bl-', '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')} } from '@/uni_modules/belay-unix'
+\`\`\`
+
+或者使用全局注册：
+
+\`\`\`typescript
+// main.uts 或 main.js
+import BelayUnix from '@/uni_modules/belay-unix'
+app.use(BelayUnix)
+\`\`\`
+`
+}
+</script>
+
+<style lang="scss">
+.component-detail-content {
+  width: 100%;
+}
+
+.doc-wrapper {
+  width: 100%;
+}
+
+.loading,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.loading-text,
+.error-text {
+  font-size: 16px;
+  color: #999;
+}
+
+.error-text {
+  color: #f56c6c;
+}
+</style>
+

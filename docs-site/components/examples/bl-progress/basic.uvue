@@ -1,0 +1,15 @@
+<template>
+  <view class="example-basic">
+    <bl-progress :percent="50"></bl-progress>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>
+

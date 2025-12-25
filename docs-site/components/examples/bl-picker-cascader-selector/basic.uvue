@@ -1,0 +1,46 @@
+<template>
+  <view class="example-basic">
+    <bl-picker-cascader-selector 
+      :options="cascaderOptions" 
+      :value="selectedCascader"
+      placeholder="请选择"
+      @change="handleChange"
+    ></bl-picker-cascader-selector>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const cascaderOptions = ref([
+  {
+    label: '选项1',
+    value: '1',
+    children: [
+      { label: '选项1-1', value: '1-1' },
+      { label: '选项1-2', value: '1-2' }
+    ]
+  },
+  {
+    label: '选项2',
+    value: '2',
+    children: [
+      { label: '选项2-1', value: '2-1' },
+      { label: '选项2-2', value: '2-2' }
+    ]
+  }
+])
+
+const selectedCascader = ref<Array<string | number>>([])
+
+const handleChange = (value: Array<string | number>) => {
+  selectedCascader.value = value
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

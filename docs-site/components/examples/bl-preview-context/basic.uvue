@@ -1,0 +1,29 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showPreview = true">预览图片</bl-button>
+    <bl-preview-context 
+      :urls="imageUrls"
+      :current="currentIndex"
+      v-if="showPreview"
+    ></bl-preview-context>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showPreview = ref(false)
+const currentIndex = ref(0)
+const imageUrls = ref([
+  'https://via.placeholder.com/300x200/409eff/ffffff?text=Image1',
+  'https://via.placeholder.com/300x200/67c23a/ffffff?text=Image2',
+  'https://via.placeholder.com/300x200/e6a23c/ffffff?text=Image3'
+])
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

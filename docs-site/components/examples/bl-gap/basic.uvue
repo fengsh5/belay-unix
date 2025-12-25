@@ -1,0 +1,16 @@
+<template>
+  <view class="example-basic">
+    <view>内容1</view>
+    <bl-gap></bl-gap>
+    <view>内容2</view>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+</style>
+

@@ -1,0 +1,21 @@
+<template>
+  <view class="example-basic">
+    <bl-i18n-provider>
+      <view class="i18n-content">
+        <text>国际化提供者内容</text>
+      </view>
+    </bl-i18n-provider>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.i18n-content {
+  padding: 20px;
+  text-align: center;
+}
+</style>
+

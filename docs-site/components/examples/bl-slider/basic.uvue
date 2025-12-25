@@ -1,0 +1,15 @@
+<template>
+  <view class="example-basic">
+    <bl-slider :value="50"></bl-slider>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>
+

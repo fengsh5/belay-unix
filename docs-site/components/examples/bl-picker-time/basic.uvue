@@ -1,0 +1,26 @@
+<template>
+  <view class="example-basic">
+    <bl-picker-time 
+      :value="selectedTime"
+      placeholder="请选择时间"
+      @change="handleChange"
+    ></bl-picker-time>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const selectedTime = ref<string>('')
+
+const handleChange = (value: string) => {
+  selectedTime.value = value
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

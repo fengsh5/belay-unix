@@ -1,0 +1,13 @@
+<template>
+  <view class="example-basic">
+    <bl-empty></bl-empty>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  min-height: 200px;
+}
+</style>
+

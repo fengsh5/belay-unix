@@ -1,0 +1,31 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showModal = true">打开模态框</bl-button>
+    <bl-modal :visible="showModal" @close="showModal = false">
+      <view class="modal-content">
+        <text>这是模态框内容</text>
+        <bl-button @click="showModal = false" style="margin-top: 20px;">关闭</bl-button>
+      </view>
+    </bl-modal>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showModal = ref(false)
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.modal-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+</style>
+

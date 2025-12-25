@@ -1,0 +1,22 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showShare = true">打开分享弹窗</bl-button>
+    <bl-share-dialog 
+      :visible="showShare"
+      @close="showShare = false"
+    ></bl-share-dialog>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showShare = ref(false)
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

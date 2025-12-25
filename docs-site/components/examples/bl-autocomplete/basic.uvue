@@ -1,0 +1,32 @@
+<template>
+  <view class="example-basic">
+    <bl-autocomplete 
+      :options="options" 
+      placeholder="请输入内容"
+      @select="handleSelect"
+    ></bl-autocomplete>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const options = ref([
+  '选项1',
+  '选项2',
+  '选项3',
+  '选项4',
+  '选项5'
+])
+
+const handleSelect = (value: string) => {
+  console.log('选择了:', value)
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

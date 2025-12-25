@@ -1,0 +1,17 @@
+<template>
+  <view class="example-types">
+    <bl-input type="text" placeholder="文本输入"></bl-input>
+    <bl-input type="number" placeholder="数字输入"></bl-input>
+    <bl-input password placeholder="密码输入"></bl-input>
+  </view>
+</template>
+
+<style lang="scss">
+.example-types {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>
+

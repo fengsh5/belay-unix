@@ -1,0 +1,210 @@
+<template>
+  <view class="doc-sidebar" :class="{ 'doc-sidebar--mobile': isMobile }">
+    <view class="sidebar-content">
+      <view 
+        v-for="group in sidebarGroups" 
+        :key="group.text"
+        class="sidebar-group"
+      >
+        <text class="sidebar-group-title">{{ group.text }}</text>
+        <view class="sidebar-items">
+          <view
+            v-for="item in group.items"
+            :key="item.link"
+            :class="['sidebar-item', { 'sidebar-item--active': isActive(item.link) }]"
+            @click="navigateTo(item.link)"
+          >
+            <text class="sidebar-item-text">{{ item.text }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed, onMounted } from 'vue'
+
+type SidebarItem = {
+  text: string
+  link: string
+}
+
+type SidebarGroup = {
+  text: string
+  items: SidebarItem[]
+}
+
+const props = defineProps<{
+  groups: SidebarGroup[]
+}>()
+
+const isMobile = ref(false)
+const currentPath = ref<string>('')
+
+const sidebarGroups = computed(() => {
+  return props.groups || []
+})
+
+onMounted(() => {
+  updateCurrentPath()
+  // #ifdef H5
+  checkMobile()
+  // #endif
+})
+
+function updateCurrentPath() {
+  // #ifdef APP || H5
+  const pages = getCurrentPages()
+  if (pages != null && pages.length > 0) {
+    const currentPage = pages[pages.length - 1]
+    if (currentPage != null && currentPage.route != null) {
+      currentPath.value = `/${currentPage.route}`
+    }
+  }
+  // #endif
+}
+
+// #ifdef H5
+function checkMobile() {
+  if (typeof window != 'undefined') {
+    const check = () => {
+      isMobile.value = window.innerWidth < 768
+    }
+    check()
+    window.addEventListener('resize', check)
+  }
+}
+// #endif
+
+function isActive(link: string): boolean {
+  // 移除开头的 / 进行比较
+  const normalizedLink = link.startsWith('/') ? link.substring(1) : link
+  const normalizedPath = currentPath.value.startsWith('/') ? currentPath.value.substring(1) : currentPath.value
+  return normalizedPath === normalizedLink || normalizedPath.startsWith(normalizedLink + '/')
+}
+
+function navigateTo(link: string) {
+  // 将 VitePress 风格的链接转换为 uni-app 路径
+  let path = link
+  if (path.startsWith('/')) {
+    path = path.substring(1)
+  }
+  
+  // 映射路径
+  if (path === '' || path === 'index') {
+    path = '/pages/index/index'
+  } else if (path.startsWith('guide/')) {
+    const guidePath = path.replace('guide/', '')
+    if (guidePath === '' || guidePath === 'index') {
+      path = '/pages/guide/index'
+    } else {
+      // 其他指南页面可以在这里添加
+      path = '/pages/guide/index'
+    }
+  } else if (path.startsWith('components/')) {
+    const compPath = path.replace('components/', '')
+    if (compPath === '' || compPath === 'index') {
+      path = '/pages/components/index'
+    } else {
+      // 组件详情页
+      const componentName = compPath.replace('bl-', 'bl-')
+      path = `/pages/component-detail/index?name=${encodeURIComponent(componentName)}`
+    }
+  }
+  
+  if (path.startsWith('/pages/')) {
+    uni.navigateTo({
+      url: path,
+      fail: () => {
+        uni.reLaunch({ url: path })
+      }
+    })
+  }
+}
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.doc-sidebar {
+  width: 100%;
+  height: 100%;
+  background: $vp-c-bg;
+  overflow-y: auto;
+  /* #ifdef H5 */
+  max-height: calc(100vh - 44px);
+  /* #endif */
+}
+
+.doc-sidebar--mobile {
+  width: 100%;
+  position: fixed;
+  top: 44px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: calc(100vh - 44px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-content {
+  padding: 12px 0;
+}
+
+.sidebar-group {
+  margin-bottom: 32px;
+}
+
+.sidebar-group:first-child {
+  margin-top: 0;
+}
+
+.sidebar-group-title {
+  font-size: 11px;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-3;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 24px 8px 24px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.sidebar-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-item {
+  padding: 4px 12px 4px 24px;
+  margin: 2px 0;
+  cursor: pointer;
+  transition: all $vp-transition-base;
+  border-left: 2px solid transparent;
+}
+
+.sidebar-item--active {
+  background-color: $vp-c-bg-soft;
+  border-left-color: $vp-c-brand;
+}
+
+.sidebar-item-text {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-1;
+  line-height: 1.5;
+  transition: color $vp-transition-base;
+}
+
+.sidebar-item--active .sidebar-item-text {
+  color: $vp-c-brand;
+  font-weight: $vp-font-weight-medium;
+}
+
+/* #ifdef H5 */
+.sidebar-item:hover:not(.sidebar-item--active) {
+  background-color: $vp-c-bg-soft;
+}
+/* #endif */
+</style>
+

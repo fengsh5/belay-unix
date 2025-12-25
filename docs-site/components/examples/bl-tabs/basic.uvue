@@ -1,0 +1,22 @@
+<template>
+  <view class="example-basic">
+    <bl-tabs active-key="1">
+      <bl-tab-panel title="标签1" name="1">
+        <text>标签1的内容</text>
+      </bl-tab-panel>
+      <bl-tab-panel title="标签2" name="2">
+        <text>标签2的内容</text>
+      </bl-tab-panel>
+      <bl-tab-panel title="标签3" name="3">
+        <text>标签3的内容</text>
+      </bl-tab-panel>
+    </bl-tabs>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

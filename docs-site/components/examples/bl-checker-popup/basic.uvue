@@ -1,0 +1,38 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showPopup = true">打开选择器弹窗</bl-button>
+    <bl-checker-popup 
+      :visible="showPopup" 
+      title="选择选项"
+      type="checkbox"
+      :options="checkerOptions"
+      :value="checkerValues"
+      @close="showPopup = false"
+      @confirm="handleConfirm"
+    ></bl-checker-popup>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showPopup = ref(false)
+const checkerOptions = ref([
+  { label: '选项1', value: '1' },
+  { label: '选项2', value: '2' },
+  { label: '选项3', value: '3' }
+])
+const checkerValues = ref<Array<string | number>>(['1'])
+
+const handleConfirm = (value: string | number | Array<string | number>) => {
+  checkerValues.value = value as Array<string | number>
+  showPopup.value = false
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

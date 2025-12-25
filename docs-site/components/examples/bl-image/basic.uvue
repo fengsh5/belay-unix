@@ -1,0 +1,19 @@
+<template>
+  <view class="example-basic">
+    <bl-image 
+      src="https://pic.616pic.com/photoone/00/02/58/618cf527354c35308.jpg!/fw/1120"
+      mode="aspectFit"
+      style="width: 200px; height: 200px;"
+    ></bl-image>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

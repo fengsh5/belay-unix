@@ -1,0 +1,26 @@
+<template>
+  <view class="example-basic">
+    <bl-picker-date 
+      :value="selectedDate"
+      placeholder="请选择日期"
+      @change="handleChange"
+    ></bl-picker-date>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const selectedDate = ref<string>('')
+
+const handleChange = (value: string) => {
+  selectedDate.value = value
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

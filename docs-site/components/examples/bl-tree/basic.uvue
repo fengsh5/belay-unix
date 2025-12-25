@@ -1,0 +1,35 @@
+<template>
+  <view class="example-basic">
+    <bl-tree :tree-data="treeData"></bl-tree>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const treeData = ref([
+  {
+    key: '1',
+    title: '节点1',
+    children: [
+      { key: '1-1', title: '节点1-1' },
+      { key: '1-2', title: '节点1-2' }
+    ]
+  },
+  {
+    key: '2',
+    title: '节点2',
+    children: [
+      { key: '2-1', title: '节点2-1' },
+      { key: '2-2', title: '节点2-2' }
+    ]
+  }
+])
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

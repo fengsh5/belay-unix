@@ -1,0 +1,363 @@
+<template>
+  <view class="home-page">
+    <top-navbar></top-navbar>
+    <!-- #ifdef APP -->
+    <scroll-view class="container" scroll-y>
+    <!-- #endif -->
+    <!-- #ifndef APP -->
+    <view class="container">
+    <!-- #endif -->
+      <view class="hero-section">
+        <view class="hero-content">
+          <text class="hero-title">
+            <text class="hero-name">Belay-Unix</text>
+            <text class="hero-text">组件库</text>
+          </text>
+          <text class="hero-tagline">支持 uni-app 和 uni-app x 的跨平台组件库</text>
+          <view class="hero-actions">
+            <button class="action-btn primary" @click="goToGuide">快速开始</button>
+            <button class="action-btn alt" @click="goToComponents">查看组件</button>
+          </view>
+        </view>
+      </view>
+
+      <view class="features-section">
+        <view class="feature-item" v-for="feature in features" :key="feature.icon">
+          <text class="feature-icon">{{ feature.icon }}</text>
+          <text class="feature-title">{{ feature.title }}</text>
+          <text class="feature-details">{{ feature.details }}</text>
+        </view>
+      </view>
+
+      <view class="quick-start-section">
+        <text class="section-title">快速开始</text>
+        
+        <text class="subsection-title">安装</text>
+        <view class="code-block">
+          <text class="code-line">npm install belay-unix</text>
+        </view>
+        
+        <text class="subsection-title">使用</text>
+        <view class="code-block">
+          <text class="code-line">&lt;template&gt;
+  &lt;view&gt;
+    &lt;bl-button type="primary"&gt;按钮&lt;/bl-button&gt;
+    &lt;bl-input v-model="value" placeholder="请输入" /&gt;
+  &lt;/view&gt;
+&lt;/template&gt;</text>
+        </view>
+      </view>
+
+      <view class="categories-section">
+        <text class="section-title">组件分类</text>
+        <view class="component-grid">
+          <view 
+            class="component-card" 
+            v-for="category in categories" 
+            :key="category.name"
+            @click="goToCategory(category.name)"
+          >
+            <text class="card-title">{{ category.name }}</text>
+            <text class="card-desc">{{ category.description }}</text>
+            <text class="card-link" @click.stop="goToComponents">查看组件 →</text>
+          </view>
+        </view>
+      </view>
+    <!-- #ifdef APP -->
+    </scroll-view>
+    <!-- #endif -->
+    <!-- #ifndef APP -->
+    </view>
+    <!-- #endif -->
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const features = ref([
+  {
+    icon: '🚀',
+    title: '跨平台支持',
+    details: '支持 uni-app 和 uni-app x，覆盖 App、H5、小程序等多个平台'
+  },
+  {
+    icon: '📦',
+    title: '107+ 组件',
+    details: '提供丰富的组件生态，覆盖基础、表单、反馈、展示、导航等场景'
+  },
+  {
+    icon: '🎨',
+    title: '主题系统',
+    details: '支持动态主题切换、自定义主题配置，提供浅色和深色主题'
+  },
+  {
+    icon: '⚡',
+    title: '高性能',
+    details: '使用 UTS 语言和 .uvue 文件，获得原生性能体验'
+  },
+  {
+    icon: '🔧',
+    title: '易于使用',
+    details: '支持全局注册、按需导入、Easycom 自动导入等多种方式'
+  },
+  {
+    icon: '📱',
+    title: '类型支持',
+    details: '完整的 TypeScript 类型定义，提供良好的开发体验'
+  }
+])
+
+const categories = ref([
+  { 
+    name: '基础组件', 
+    description: '按钮、输入框、图标、图片等基础 UI 组件',
+    count: 16
+  },
+  { 
+    name: '表单组件', 
+    description: '表单、复选框、单选框、开关等表单相关组件',
+    count: 17
+  },
+  { 
+    name: '反馈组件', 
+    description: '对话框、消息提示、加载中、通知等反馈组件',
+    count: 13
+  },
+  { 
+    name: '展示组件', 
+    description: '表格、标签、卡片、日历等数据展示组件',
+    count: 20
+  },
+  { 
+    name: '导航组件', 
+    description: '标签页、菜单、分页、标签栏等导航组件',
+    count: 8
+  },
+  { 
+    name: '布局组件', 
+    description: '行、列、弹性布局、宫格等布局组件',
+    count: 11
+  }
+])
+
+const goToGuide = () => {
+  uni.navigateTo({
+    url: '/pages/guide/index'
+  })
+}
+
+const goToComponents = () => {
+  uni.navigateTo({
+    url: '/pages/components/index'
+  })
+}
+
+const goToCategory = (name: string) => {
+  uni.navigateTo({
+    url: `/pages/components/index?category=${encodeURIComponent(name)}`
+  })
+}
+</script>
+
+<style lang="scss">
+.home-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  padding-top: 44px;
+  /* #ifdef APP */
+  padding-top: calc(44px + env(safe-area-inset-top));
+  /* #endif */
+}
+
+.container {
+  flex: 1;
+}
+
+.hero-section {
+  padding: 80px 40px;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 0 0 40px 40px;
+}
+
+.hero-content {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 64px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-name {
+  display: block;
+}
+
+.hero-text {
+  display: block;
+  font-size: 38px;
+  opacity: 0.9;
+}
+
+.hero-tagline {
+  font-size: 20px;
+  opacity: 0.9;
+  margin-bottom: 40px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+}
+
+.action-btn.primary {
+  background: white;
+  color: #667eea;
+}
+
+.action-btn.alt {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.features-section {
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.feature-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.feature-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.feature-details {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.quick-start-section,
+.categories-section {
+  padding: 60px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 32px;
+  text-align: center;
+  display: block;
+}
+
+.subsection-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 24px 0 16px 0;
+  display: block;
+}
+
+.code-block {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.code-line {
+  font-size: 14px;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.component-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 32px;
+  justify-content: center;
+}
+
+.component-card {
+  padding: 24px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: white;
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.card-title {
+  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  display: block;
+}
+
+.card-desc {
+  color: #666;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  display: block;
+}
+
+.card-link {
+  color: #409eff;
+  font-weight: 500;
+  font-size: 14px;
+  display: block;
+}
+</style>
+

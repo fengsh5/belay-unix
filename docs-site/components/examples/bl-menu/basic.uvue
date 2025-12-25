@@ -1,0 +1,16 @@
+<template>
+  <view class="example-basic">
+    <bl-menu :default-selected-keys="['1']">
+      <bl-menu-item key="1">菜单项1</bl-menu-item>
+      <bl-menu-item key="2">菜单项2</bl-menu-item>
+      <bl-menu-item key="3">菜单项3</bl-menu-item>
+    </bl-menu>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

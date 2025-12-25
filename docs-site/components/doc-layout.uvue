@@ -1,0 +1,165 @@
+<template>
+  <view class="doc-layout">
+    <top-navbar></top-navbar>
+    <view class="doc-layout-container">
+      <!-- 侧边栏 -->
+      <view class="doc-sidebar-wrapper" v-if="showSidebar">
+        <doc-sidebar :groups="sidebarGroups"></doc-sidebar>
+      </view>
+      
+      <!-- 主内容区 -->
+      <view class="doc-main">
+        <!-- #ifdef APP -->
+        <scroll-view class="doc-content-scroll" scroll-y>
+          <slot></slot>
+        </scroll-view>
+        <!-- #endif -->
+        <!-- #ifndef APP -->
+        <view class="doc-content">
+          <slot></slot>
+        </view>
+        <!-- #endif -->
+      </view>
+      
+      <!-- 目录 -->
+      <view class="doc-toc-wrapper" v-if="showToc && tocItems.length > 0">
+        <doc-toc :items="tocItems"></doc-toc>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+
+type SidebarGroup = {
+  text: string
+  items: Array<{ text: string; link: string }>
+}
+
+type TocItem = {
+  id: string
+  text: string
+  level: number
+}
+
+const props = defineProps<{
+  sidebarGroups?: SidebarGroup[]
+  showSidebar?: boolean
+  showToc?: boolean
+  tocItems?: TocItem[]
+}>()
+
+const sidebarGroups = computed(() => {
+  return props.sidebarGroups || []
+})
+
+const showSidebar = computed(() => {
+  return props.showSidebar !== false && sidebarGroups.value.length > 0
+})
+
+const showToc = computed(() => {
+  return props.showToc !== false
+})
+
+const tocItems = computed(() => {
+  return props.tocItems || []
+})
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.doc-layout {
+  min-height: 100vh;
+  background: $vp-c-bg;
+  padding-top: 44px;
+  /* #ifdef APP */
+  padding-top: calc(44px + env(safe-area-inset-top));
+  /* #endif */
+  /* #ifdef H5 */
+  position: relative;
+  /* #endif */
+}
+
+.doc-layout-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  min-height: calc(100vh - 44px);
+  /* #ifdef APP */
+  min-height: calc(100vh - 44px - env(safe-area-inset-top));
+  /* #endif */
+  /* #ifdef H5 */
+  max-width: 100%;
+  position: relative;
+  /* #endif */
+}
+
+.doc-sidebar-wrapper {
+  width: 272px;
+  flex-shrink: 0;
+  background: $vp-c-bg;
+  border-right: 1px solid $vp-c-divider;
+  /* #ifdef H5 */
+  position: fixed;
+  top: 44px;
+  left: 0;
+  height: calc(100vh - 44px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10;
+  /* #endif */
+  /* #ifndef H5 */
+  display: none;
+  /* #endif */
+}
+
+.doc-main {
+  flex: 1;
+  min-width: 0;
+  background: $vp-c-bg;
+  /* #ifdef H5 */
+  margin-left: 272px;
+  /* #endif */
+}
+
+.doc-content-scroll,
+.doc-content {
+  width: 100%;
+  height: 100%;
+}
+
+.doc-content {
+  max-width: 80%;
+  padding: $vp-spacing-2xl 32px;
+}
+
+/* #ifdef H5 */
+/* 允许示例预览组件填充内容区域的80% */
+.doc-content .example-preview {
+  max-width: 80%;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* #endif */
+
+.doc-toc-wrapper {
+  width: 256px;
+  flex-shrink: 0;
+  /* #ifdef H5 */
+  position: fixed;
+  top: 44px;
+  right: 0;
+  height: calc(100vh - 44px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10;
+  /* #endif */
+  /* #ifndef H5 */
+  display: none;
+  /* #endif */
+}
+</style>
+

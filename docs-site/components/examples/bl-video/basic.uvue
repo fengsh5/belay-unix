@@ -1,0 +1,16 @@
+<template>
+  <view class="example-basic">
+    <bl-video 
+      src="https://example.com/video.mp4"
+      :controls="true"
+      :show-center-play-btn="true"
+    ></bl-video>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

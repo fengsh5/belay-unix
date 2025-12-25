@@ -1,0 +1,14 @@
+<template>
+  <view class="example-basic">
+    <bl-pagination :total="100" :current="1" :page-size="10"></bl-pagination>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+}
+</style>
+

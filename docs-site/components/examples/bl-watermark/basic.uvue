@@ -1,0 +1,25 @@
+<template>
+  <view class="example-basic">
+    <bl-watermark content="水印文字">
+      <view class="watermark-content">
+        <text>这是需要添加水印的内容</text>
+      </view>
+    </bl-watermark>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.watermark-content {
+  padding: 40px;
+  background: #fff;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

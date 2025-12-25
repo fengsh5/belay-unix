@@ -1,0 +1,28 @@
+<template>
+  <view class="example-basic">
+    <bl-picker-selector 
+      :range="options" 
+      :value="selectedValue"
+      placeholder="请选择"
+      @change="handleChange"
+    ></bl-picker-selector>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const options = ref(['选项1', '选项2', '选项3', '选项4', '选项5'])
+const selectedValue = ref<number | null>(null)
+
+const handleChange = (value: string | number) => {
+  selectedValue.value = value as number
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

@@ -1,0 +1,44 @@
+<template>
+  <view class="example-basic">
+    <bl-custom-navigation-bar 
+      title="自定义导航栏"
+      :show-back="true"
+      background-color="#ffffff"
+      text-color="#323233"
+      :fixed="false"
+      @back="handleBack"
+    >
+      <template #right>
+        <view class="nav-right">
+          <text>更多</text>
+        </view>
+      </template>
+    </bl-custom-navigation-bar>
+    <view class="content">
+      <text>页面内容</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+const handleBack = () => {
+  console.log('返回按钮点击')
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 0;
+  min-height: 200px;
+}
+
+.nav-right {
+  padding: 0 16px;
+}
+
+.content {
+  padding: 20px;
+  text-align: center;
+}
+</style>
+

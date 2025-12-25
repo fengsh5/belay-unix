@@ -1,0 +1,17 @@
+<template>
+  <view class="example-basic">
+    <bl-popconfirm title="确定要删除吗？" description="删除后无法恢复">
+      <bl-button type="danger">删除</bl-button>
+    </bl-popconfirm>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

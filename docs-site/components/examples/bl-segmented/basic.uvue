@@ -1,0 +1,15 @@
+<template>
+  <view class="example-basic">
+    <bl-segmented :options="['选项1', '选项2', '选项3']" :default-value="'选项1'"></bl-segmented>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

@@ -1,0 +1,42 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showTour = true">开始引导</bl-button>
+    <bl-tour 
+      :open="showTour" 
+      :steps="tourSteps"
+      @close="showTour = false"
+    ></bl-tour>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showTour = ref(false)
+const tourSteps = ref([
+  {
+    target: '.step1',
+    title: '步骤1',
+    description: '这是第一步说明'
+  },
+  {
+    target: '.step2',
+    title: '步骤2',
+    description: '这是第二步说明'
+  }
+])
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.step1, .step2 {
+  padding: 12px;
+  background: #f5f5f5;
+  margin: 8px 0;
+  border-radius: 4px;
+}
+</style>
+

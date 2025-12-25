@@ -1,0 +1,15 @@
+{
+  "hash": "f514ebda",
+  "configHash": "5e7639fe",
+  "lockfileHash": "9372fe59",
+  "browserHash": "47ecb5cc",
+  "optimized": {
+    "tslib": {
+      "src": "../../../../../../../../node_modules/tslib/tslib.es6.mjs",
+      "file": "tslib.js",
+      "fileHash": "c5559048",
+      "needsInterop": false
+    }
+  },
+  "chunks": {}
+}

@@ -1,0 +1,43 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="drawPoster">绘制海报</bl-button>
+    <bl-poster-painter 
+      :palette="posterPalette"
+      width="750"
+      height="1334"
+      @complete="handleComplete"
+      @fail="handleFail"
+    ></bl-poster-painter>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const posterPalette = ref<any>(null)
+
+const drawPoster = () => {
+  // 配置海报绘制参数
+  posterPalette.value = {
+    width: 750,
+    height: 1334,
+    background: '#ffffff',
+    views: []
+  }
+}
+
+const handleComplete = (imagePath: string) => {
+  console.log('海报绘制完成:', imagePath)
+}
+
+const handleFail = (error: any) => {
+  console.error('海报绘制失败:', error)
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

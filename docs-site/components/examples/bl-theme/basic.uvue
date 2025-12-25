@@ -1,0 +1,23 @@
+<template>
+  <view class="example-basic">
+    <bl-theme name="light">
+      <view class="theme-content">
+        <text>浅色主题内容</text>
+      </view>
+    </bl-theme>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.theme-content {
+  padding: 20px;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 8px;
+}
+</style>
+

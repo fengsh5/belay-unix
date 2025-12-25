@@ -1,0 +1,20 @@
+<template>
+  <view class="example-basic">
+    <bl-button @click="showMessage">显示消息</bl-button>
+    <bl-message></bl-message>
+  </view>
+</template>
+
+<script setup lang="uts">
+const showMessage = () => {
+  // 消息组件通常通过方法调用，这里展示组件使用
+  console.log('显示消息')
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

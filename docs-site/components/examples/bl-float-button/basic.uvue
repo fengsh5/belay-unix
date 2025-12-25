@@ -1,0 +1,28 @@
+<template>
+  <view class="example-basic">
+    <view class="content">
+      <text>内容区域</text>
+    </view>
+    <bl-float-button icon="plus" @click="handleClick"></bl-float-button>
+  </view>
+</template>
+
+<script setup lang="uts">
+const handleClick = () => {
+  console.log('点击了悬浮按钮')
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  position: relative;
+  min-height: 200px;
+}
+
+.content {
+  padding: 20px;
+  text-align: center;
+}
+</style>
+

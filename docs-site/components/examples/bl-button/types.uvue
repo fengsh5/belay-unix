@@ -1,0 +1,25 @@
+<template>
+  <view class="example-types">
+    <view class="button-group">
+      <bl-button type="default">默认按钮</bl-button>
+      <bl-button type="primary">主要按钮</bl-button>
+      <bl-button type="success">成功按钮</bl-button>
+      <bl-button type="warning">警告按钮</bl-button>
+      <bl-button type="danger">危险按钮</bl-button>
+    </view>
+  </view>
+</template>
+
+<style lang="scss">
+.example-types {
+  padding: 16px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+</style>
+

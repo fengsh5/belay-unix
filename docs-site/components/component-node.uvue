@@ -1,0 +1,204 @@
+<template>
+  <!-- 文本节点 -->
+  <text v-if="node.type === 'text'" class="node-text">{{ node.text }}</text>
+  
+  <!-- view 标签 -->
+  <view v-else-if="node.tag === 'view'" :class="node.attrs.class" :style="getStyle(node.attrs)">
+    <component-node 
+      v-for="(child, index) in node.children" 
+      :key="index"
+      :node="child"
+    ></component-node>
+  </view>
+  
+  <!-- bl-button 组件 -->
+  <bl-button 
+    v-else-if="node.tag === 'bl-button'"
+    :type="getProp(node.attrs, 'type', 'default')"
+    :size="getProp(node.attrs, 'size')"
+    :plain="getBooleanProp(node.attrs, 'plain')"
+    :disabled="getBooleanProp(node.attrs, 'disabled')"
+    :loading="getBooleanProp(node.attrs, 'loading')"
+    :round="getBooleanProp(node.attrs, 'round')"
+    :block="getBooleanProp(node.attrs, 'block')"
+    :class="node.attrs.class"
+    :style="getStyle(node.attrs)"
+  >
+    <template v-for="(child, index) in node.children" :key="index">
+      <component-node :node="child"></component-node>
+    </template>
+    <text v-if="node.children.length === 0 && node.text">{{ node.text }}</text>
+  </bl-button>
+  
+  <!-- bl-text 组件 -->
+  <bl-text 
+    v-else-if="node.tag === 'bl-text'"
+    :type="getProp(node.attrs, 'type')"
+    :size="getProp(node.attrs, 'size')"
+    :color="getProp(node.attrs, 'color')"
+    :bold="getBooleanProp(node.attrs, 'bold')"
+    :class="node.attrs.class"
+    :style="getStyle(node.attrs)"
+  >
+    <template v-for="(child, index) in node.children" :key="index">
+      <component-node :node="child"></component-node>
+    </template>
+    <text v-if="node.children.length === 0 && node.text">{{ node.text }}</text>
+  </bl-text>
+  
+  <!-- bl-view 组件 -->
+  <bl-view 
+    v-else-if="node.tag === 'bl-view'"
+    :class="node.attrs.class"
+    :style="getStyle(node.attrs)"
+  >
+    <component-node 
+      v-for="(child, index) in node.children" 
+      :key="index"
+      :node="child"
+    ></component-node>
+  </bl-view>
+  
+  <!-- bl-input 组件 -->
+  <bl-input 
+    v-else-if="node.tag === 'bl-input'"
+    :value="getProp(node.attrs, 'value')"
+    :placeholder="getProp(node.attrs, 'placeholder')"
+    :type="getProp(node.attrs, 'type', 'text')"
+    :disabled="getBooleanProp(node.attrs, 'disabled')"
+    :readonly="getBooleanProp(node.attrs, 'readonly')"
+    :class="node.attrs.class"
+    :style="getStyle(node.attrs)"
+  ></bl-input>
+  
+  <!-- bl-switch 组件 -->
+  <bl-switch 
+    v-else-if="node.tag === 'bl-switch'"
+    :value="getBooleanProp(node.attrs, 'value')"
+    :disabled="getBooleanProp(node.attrs, 'disabled')"
+    :class="node.attrs.class"
+    :style="getStyle(node.attrs)"
+  ></bl-switch>
+  
+  <!-- 其他 bl- 组件，尝试使用动态组件 -->
+  <component 
+    v-else-if="node.tag.startsWith('bl-')"
+    :is="node.tag"
+    :class="node.attrs.class"
+    :style="getStyle(node.attrs)"
+    v-bind="getComponentProps(node.attrs)"
+  >
+    <template v-for="(child, index) in node.children" :key="index">
+      <component-node :node="child"></component-node>
+    </template>
+    <text v-if="node.children.length === 0 && node.text">{{ node.text }}</text>
+  </component>
+  
+  <!-- 其他标签，使用 view 渲染 -->
+  <view v-else :class="node.attrs.class" :style="getStyle(node.attrs)">
+    <component-node 
+      v-for="(child, index) in node.children" 
+      :key="index"
+      :node="child"
+    ></component-node>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+
+type ComponentNode = {
+  type: string
+  tag: string
+  attrs: Record<string, string>
+  children: ComponentNode[]
+  text?: string
+}
+
+const props = defineProps<{
+  node: ComponentNode
+}>()
+
+function getStyle(attrs: Record<string, string>): string {
+  if (attrs.style) {
+    return attrs.style
+  }
+  return ''
+}
+
+function getProp(attrs: Record<string, string>, key: string, defaultValue?: string): string {
+  return attrs[key] || defaultValue || ''
+}
+
+function getBooleanProp(attrs: Record<string, string>, key: string): boolean {
+  const value = attrs[key]
+  if (value === '' || value === 'true') {
+    return true
+  }
+  if (value === 'false') {
+    return false
+  }
+  return false
+}
+
+function getComponentProps(attrs: Record<string, string>): Record<string, any> {
+  const props: Record<string, any> = {}
+  
+  // 布尔属性列表
+  const booleanAttrs = ['disabled', 'readonly', 'loading', 'plain', 'round', 'block', 'checked', 'dot', 'is-link']
+  
+  for (const key in attrs) {
+    const value = attrs[key]
+    
+    // 跳过 class 和 style，它们需要特殊处理
+    if (key === 'class' || key === 'style') {
+      continue
+    }
+    
+    // 处理布尔属性
+    if (booleanAttrs.includes(key)) {
+      if (value === '' || value === 'true') {
+        props[key] = true
+      } else if (value === 'false') {
+        props[key] = false
+      } else {
+        props[key] = !!value
+      }
+    } else {
+      // 尝试转换为数字
+      const num = Number(value)
+      if (value != null && value !== '' && !isNaN(num) && value.trim() !== '' && value !== 'true' && value !== 'false') {
+        props[key] = num
+      } else {
+        props[key] = value
+      }
+    }
+  }
+  
+  return props
+}
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.node-text {
+  display: inline;
+}
+
+.unsupported-component {
+  padding: $vp-spacing-sm;
+  border: 1px dashed $vp-c-divider;
+  border-radius: $vp-border-radius-sm;
+  margin: $vp-spacing-xs 0;
+}
+
+.component-name {
+  font-size: $vp-font-size-xs;
+  color: $vp-c-text-3;
+  font-family: 'Monaco', 'Courier New', monospace;
+  display: block;
+  margin-bottom: $vp-spacing-xs;
+}
+</style>
+

@@ -1,0 +1,16 @@
+<template>
+  <view class="example-basic">
+    <bl-descriptions title="用户信息">
+      <bl-descriptions-item label="姓名">张三</bl-descriptions-item>
+      <bl-descriptions-item label="年龄">25</bl-descriptions-item>
+      <bl-descriptions-item label="地址">北京市朝阳区</bl-descriptions-item>
+    </bl-descriptions>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

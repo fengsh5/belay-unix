@@ -1,0 +1,24 @@
+<template>
+  <view class="example-basic">
+    <bl-filter>
+      <view class="filter-content">
+        <bl-button size="small">筛选1</bl-button>
+        <bl-button size="small">筛选2</bl-button>
+        <bl-button size="small">筛选3</bl-button>
+      </view>
+    </bl-filter>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.filter-content {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+</style>
+

@@ -1,0 +1,34 @@
+<template>
+  <view class="example-basic">
+    <bl-mp-custom-tabbar 
+      :current="currentTab"
+      :list="tabbarList"
+      :fixed="false"
+      @change="handleTabChange"
+    ></bl-mp-custom-tabbar>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const currentTab = ref(0)
+const tabbarList = ref([
+  { text: '首页', iconPath: '', selectedIconPath: '' },
+  { text: '分类', iconPath: '', selectedIconPath: '' },
+  { text: '购物车', iconPath: '', selectedIconPath: '' },
+  { text: '我的', iconPath: '', selectedIconPath: '' }
+])
+
+const handleTabChange = (index: number) => {
+  currentTab.value = index
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  min-height: 200px;
+}
+</style>
+

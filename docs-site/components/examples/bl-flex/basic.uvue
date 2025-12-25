@@ -1,0 +1,25 @@
+<template>
+  <view class="example-basic">
+    <bl-flex>
+      <view class="flex-item">1</view>
+      <view class="flex-item">2</view>
+      <view class="flex-item">3</view>
+    </bl-flex>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.flex-item {
+  padding: 12px;
+  background: #f0f0f0;
+  margin: 4px;
+  border-radius: 4px;
+  min-width: 60px;
+  text-align: center;
+}
+</style>
+

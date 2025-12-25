@@ -1,0 +1,409 @@
+/**
+ * Markdown 解析器
+ * 支持 VitePress 格式的 Markdown 文档
+ */
+
+export type MarkdownBlock = {
+  type: 'heading' | 'paragraph' | 'code' | 'list' | 'blockquote' | 'hr' | 'example' | 'table' | 'link' | 'strong' | 'emphasis' | 'inline-code'
+  text?: string
+  level?: number
+  id?: string
+  language?: string
+  code?: string
+  items?: string[]
+  ordered?: boolean
+  title?: string
+  description?: string
+  editable?: boolean
+  rows?: Array<Array<string>>
+  headers?: string[]
+  href?: string
+  linkText?: string
+  examplePath?: string  // 示例组件路径
+}
+
+/**
+ * 解析 Markdown 内容
+ */
+export function parseMarkdown(content: string): MarkdownBlock[] {
+  if (!content) return []
+  
+  const lines = content.split('\n')
+  const parsed: MarkdownBlock[] = []
+  let currentCodeBlock: string[] | null = null
+  let currentCodeLanguage = ''
+  let currentList: string[] | null = null
+  let listOrdered = false
+  let currentParagraph: string[] = []
+  let inScriptSetup = false
+  let scriptSetupContent: string[] = []
+  let exampleCodeMap: Record<string, string> = {}
+  let currentTable: MarkdownBlock | null = null
+  
+  // 首先提取 script setup 中的代码定义
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    if (line.includes('<script setup>')) {
+      inScriptSetup = true
+      continue
+    }
+    if (inScriptSetup) {
+      if (line.includes('</script>')) {
+        inScriptSetup = false
+        // 解析代码定义
+        const codeContent = scriptSetupContent.join('\n')
+        const codeMatches = codeContent.matchAll(/(\w+Code)\s*=\s*`([\s\S]*?)`/g)
+        for (const match of codeMatches) {
+          const varName = match[1]
+          const code = match[2].replace(/\\n/g, '\n').replace(/\\</g, '<').replace(/\\>/g, '>').replace(/\\"/g, '"')
+          exampleCodeMap[varName] = code
+        }
+        scriptSetupContent = []
+        continue
+      }
+      scriptSetupContent.push(line)
+    }
+  }
+  
+  // 重新遍历解析文档
+  inScriptSetup = false
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    
+    // 跳过 script setup 块
+    if (line.includes('<script setup>')) {
+      inScriptSetup = true
+      continue
+    }
+    if (inScriptSetup) {
+      if (line.includes('</script>')) {
+        inScriptSetup = false
+      }
+      continue
+    }
+    
+    // 示例预览开始标记
+    if (line.includes('<ClientOnly>') || (line.includes('<ExamplePreview') && !line.includes('</ExamplePreview>'))) {
+      // 结束当前段落
+      if (currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim()
+        if (paragraphText) {
+          parsed.push({ type: 'paragraph', text: paragraphText })
+        }
+        currentParagraph = []
+      }
+      
+      let exampleBlock: MarkdownBlock | null = null
+      let exampleCode = ''
+      let exampleTitle = ''
+      let exampleDesc = ''
+      let exampleEditable = false
+      
+      // 尝试从当前行提取属性
+      const titleMatch = line.match(/title="([^"]+)"/) || line.match(/title='([^']+)'/)
+      if (titleMatch != null) {
+        exampleTitle = titleMatch[1]
+      }
+      
+      const descMatch = line.match(/description="([^"]+)"/) || line.match(/description='([^']+)'/)
+      if (descMatch != null) {
+        exampleDesc = descMatch[1]
+      }
+      
+      // 查找 :code 绑定（变量引用）
+      const codeVarMatch = line.match(/:code="([^"]+)"/) || line.match(/:code='([^']+)'/)
+      if (codeVarMatch != null) {
+        const varName = codeVarMatch[1]
+        exampleCode = exampleCodeMap[varName] || ''
+      } else {
+        // 直接内联的 code 属性
+        const codeMatch = line.match(/code="([^"]+)"/) || line.match(/code='([^']+)'/)
+        if (codeMatch != null) {
+          exampleCode = codeMatch[1].replace(/\\n/g, '\n').replace(/\\</g, '<').replace(/\\>/g, '>').replace(/\\"/g, '"')
+        }
+      }
+      
+      const editableMatch = line.match(/:editable="(true|false)"/) || line.match(/editable="(true|false)"/)
+      if (editableMatch != null) {
+        exampleEditable = editableMatch[1] === 'true'
+      }
+      
+      // 查找结束标记
+      let foundEnd = false
+      for (let j = i + 1; j < lines.length && j < i + 10; j++) {
+        if (lines[j].includes('</ClientOnly>') || lines[j].includes('</ExamplePreview>')) {
+          foundEnd = true
+          i = j
+          break
+        }
+      }
+      
+      if (exampleCode || exampleTitle) {
+        parsed.push({
+          type: 'example',
+          code: exampleCode,
+          title: exampleTitle,
+          description: exampleDesc,
+          editable: exampleEditable
+        })
+      }
+      continue
+    }
+    
+    // 代码块
+    if (line.startsWith('```')) {
+      if (currentCodeBlock != null) {
+        // 结束代码块
+        const codeContent = currentCodeBlock.join('\n')
+        const examplePath = currentCodeBlock['__examplePath__'] as string | null
+        
+        // 检查是否有示例路径标记
+        if (examplePath != null) {
+          parsed.push({
+            type: 'example',
+            code: codeContent,
+            language: currentCodeLanguage,
+            examplePath: examplePath
+          })
+        } else if (currentCodeLanguage === 'vue' && codeContent.includes('<template>')) {
+          // 检查是否是Vue代码块，如果是且包含template，作为预览示例
+          parsed.push({
+            type: 'example',
+            code: codeContent,
+            language: currentCodeLanguage
+          })
+        } else {
+          parsed.push({
+            type: 'code',
+            language: currentCodeLanguage,
+            code: codeContent
+          })
+        }
+        currentCodeBlock = null
+        currentCodeLanguage = ''
+      } else {
+        // 开始代码块
+        const langText = line.substring(3).trim()
+        // 检查是否有 example: 标记，如 ```vue example:bl-button/basic
+        const exampleMatch = langText.match(/^(\w+)\s+example:(.+)/)
+        if (exampleMatch != null) {
+          // 这是一个示例代码块
+          currentCodeLanguage = exampleMatch[1]
+          const examplePath = exampleMatch[2].trim()
+          currentCodeBlock = []
+          currentCodeBlock['__examplePath__'] = examplePath  // 临时存储路径
+        } else {
+          currentCodeLanguage = langText
+          currentCodeBlock = []
+        }
+      }
+      continue
+    }
+    
+    if (currentCodeBlock != null) {
+      currentCodeBlock.push(line)
+      continue
+    }
+    
+    // 标题
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/)
+    if (headingMatch != null) {
+      // 结束当前段落和列表
+      if (currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim()
+        if (paragraphText) {
+          parsed.push({ type: 'paragraph', text: paragraphText })
+        }
+        currentParagraph = []
+      }
+      if (currentList != null) {
+        parsed.push({
+          type: 'list',
+          items: currentList,
+          ordered: listOrdered
+        })
+        currentList = null
+      }
+      
+      const level = headingMatch[1].length
+      const text = headingMatch[2].trim()
+      const id = generateId(text)
+      parsed.push({
+        type: 'heading',
+        level,
+        text,
+        id
+      })
+      continue
+    }
+    
+    // 列表
+    const listMatch = line.match(/^(\s*)([-*+]|\d+\.)\s+(.+)$/)
+    if (listMatch != null) {
+      if (currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim()
+        if (paragraphText) {
+          parsed.push({ type: 'paragraph', text: paragraphText })
+        }
+        currentParagraph = []
+      }
+      
+      if (currentList == null) {
+        currentList = []
+        listOrdered = /^\d+\./.test(listMatch[2])
+      }
+      currentList.push(listMatch[3].trim())
+      continue
+    } else if (currentList != null) {
+      parsed.push({
+        type: 'list',
+        items: currentList,
+        ordered: listOrdered
+      })
+      currentList = null
+    }
+    
+    // 引用
+    if (line.startsWith('> ')) {
+      if (currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim()
+        if (paragraphText) {
+          parsed.push({ type: 'paragraph', text: paragraphText })
+        }
+        currentParagraph = []
+      }
+      parsed.push({
+        type: 'blockquote',
+        text: line.substring(2).trim()
+      })
+      continue
+    }
+    
+    // 分隔线
+    if (line.match(/^[-*_]{3,}$/)) {
+      if (currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim()
+        if (paragraphText) {
+          parsed.push({ type: 'paragraph', text: paragraphText })
+        }
+        currentParagraph = []
+      }
+      parsed.push({ type: 'hr' })
+      continue
+    }
+    
+    // 表格解析
+    if (line.includes('|') && line.trim().startsWith('|')) {
+      if (currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim()
+        if (paragraphText) {
+          parsed.push({ type: 'paragraph', text: paragraphText })
+        }
+        currentParagraph = []
+      }
+      
+      // 处理转义的管道符：先替换转义的 \| 为占位符，分割后再还原
+      const placeholder = '___PIPE_PLACEHOLDER___'
+      const processedLine = line.replace(/\\\|/g, placeholder)
+      
+      // 分割表格行，但保留首尾的空单元格（Markdown 表格通常以 | 开头和结尾）
+      const parts = processedLine.split('|')
+      const cells: string[] = []
+      
+      // 处理每个部分，还原占位符并去除首尾空格
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i].replace(new RegExp(placeholder, 'g'), '|').trim()
+        // 跳过首尾的空单元格（如果存在）
+        if (i === 0 && part === '') continue
+        if (i === parts.length - 1 && part === '') continue
+        cells.push(part)
+      }
+      
+      // 检查是否是分隔行（只包含 - 和 :）
+      const isSeparator = cells.length > 0 && cells.every(cell => /^[-:]+$/.test(cell))
+      
+      if (isSeparator) {
+        // 分隔行，忽略但保持表格状态
+        continue
+      }
+      
+      if (cells.length > 0) {
+        // 这是表头或数据行
+        if (currentTable != null && currentTable.type === 'table') {
+          // 添加到现有表格
+          if (currentTable.rows == null) {
+            currentTable.rows = []
+          }
+          currentTable.rows.push(cells)
+        } else {
+          // 创建新表格
+          // 第一行是表头
+          currentTable = {
+            type: 'table',
+            headers: cells,
+            rows: []
+          }
+          parsed.push(currentTable)
+        }
+      }
+      continue
+    } else {
+      // 非表格行，结束当前表格
+      if (currentTable != null) {
+        currentTable = null
+      }
+    }
+    
+    // 段落
+    const trimmed = line.trim()
+    if (trimmed !== '') {
+      currentParagraph.push(trimmed)
+    } else {
+      // 空行，结束当前段落
+      if (currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim()
+        if (paragraphText) {
+          parsed.push({ type: 'paragraph', text: paragraphText })
+        }
+        currentParagraph = []
+      }
+    }
+  }
+  
+  // 处理未结束的块
+  if (currentCodeBlock != null) {
+    parsed.push({
+      type: 'code',
+      language: currentCodeLanguage,
+      code: currentCodeBlock.join('\n')
+    })
+  }
+  if (currentList != null) {
+    parsed.push({
+      type: 'list',
+      items: currentList,
+      ordered: listOrdered
+    })
+  }
+  if (currentParagraph.length > 0) {
+    const paragraphText = currentParagraph.join(' ').trim()
+    if (paragraphText) {
+      parsed.push({ type: 'paragraph', text: paragraphText })
+    }
+  }
+  
+  return parsed
+}
+
+/**
+ * 生成标题 ID
+ */
+function generateId(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim()
+}
+

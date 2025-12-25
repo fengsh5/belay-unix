@@ -1,0 +1,50 @@
+<template>
+  <view class="example-basic">
+    <bl-swiper :indicator-dots="true" :autoplay="true" :circular="true">
+      <swiper-item>
+        <view class="swiper-item swiper-item-1">
+          <text>1</text>
+        </view>
+      </swiper-item>
+      <swiper-item>
+        <view class="swiper-item swiper-item-2">
+          <text>2</text>
+        </view>
+      </swiper-item>
+      <swiper-item>
+        <view class="swiper-item swiper-item-3">
+          <text>3</text>
+        </view>
+      </swiper-item>
+    </bl-swiper>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.swiper-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 24px;
+}
+
+.swiper-item-1 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.swiper-item-2 {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.swiper-item-3 {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+</style>
+

@@ -1,0 +1,15 @@
+<template>
+  <view class="example-basic">
+    <bl-checkbox>选项</bl-checkbox>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

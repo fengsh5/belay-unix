@@ -1,0 +1,27 @@
+<template>
+  <view class="example-basic">
+    <bl-uploader :file-list="fileList" @after-read="handleAfterRead" @delete="handleDelete"></bl-uploader>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const fileList = ref<any[]>([])
+
+const handleAfterRead = (files: any[]) => {
+  fileList.value = [...fileList.value, ...files]
+}
+
+const handleDelete = (event: any) => {
+  const index = event.index
+  fileList.value.splice(index, 1)
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

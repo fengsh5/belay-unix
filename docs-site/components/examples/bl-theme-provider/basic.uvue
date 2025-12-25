@@ -1,0 +1,25 @@
+<template>
+  <view class="example-basic">
+    <bl-theme-provider preset-theme="light">
+      <view class="provider-content">
+        <text>主题提供者内容</text>
+        <bl-button type="primary">按钮</bl-button>
+      </view>
+    </bl-theme-provider>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.provider-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+</style>
+

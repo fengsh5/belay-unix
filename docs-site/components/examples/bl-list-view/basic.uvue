@@ -1,0 +1,37 @@
+<template>
+  <view class="example-basic">
+    <bl-list-view :data="listData" item-key="id" style="height: 300px;">
+      <template #item="{ item }">
+        <view class="list-item">
+          <text>{{ item.name }}</text>
+        </view>
+      </template>
+    </bl-list-view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const listData = ref([
+  { id: '1', name: '列表项1' },
+  { id: '2', name: '列表项2' },
+  { id: '3', name: '列表项3' },
+  { id: '4', name: '列表项4' },
+  { id: '5', name: '列表项5' }
+])
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.list-item {
+  padding: 12px;
+  background: #f5f5f5;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+</style>
+

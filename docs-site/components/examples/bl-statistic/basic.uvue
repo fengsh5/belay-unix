@@ -1,0 +1,12 @@
+<template>
+  <view class="example-basic">
+    <bl-statistic title="总销售额" :value="112893"></bl-statistic>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

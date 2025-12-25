@@ -1,0 +1,341 @@
+<template>
+  <view class="preview-renderer">
+    <!-- 动态渲染解析后的组件树 -->
+    <view v-if="parsedNodes.length > 0" class="preview-content">
+      <template v-for="(node, index) in parsedNodes" :key="index">
+        <component-node :node="node"></component-node>
+      </template>
+    </view>
+    
+    <!-- 显示解析信息 -->
+    <view v-else class="preview-info">
+      <text class="preview-info-text">代码预览</text>
+      <text class="preview-info-desc">{{ previewInfo }}</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+
+const props = defineProps<{
+  code?: string
+  template?: string
+}>()
+
+const showDebug = ref(false) // 可以通过控制台设置为 true 来显示调试信息
+
+// 计算属性：获取模板内容
+const template = computed(() => {
+  return props.template || ''
+})
+
+type ComponentNode = {
+  type: string
+  tag: string
+  attrs: Record<string, string>
+  children: ComponentNode[]
+  text?: string
+}
+
+// 解析模板为组件树
+const parsedNodes = computed(() => {
+  const tmpl = template.value
+  if (!tmpl) {
+    console.log('[preview-renderer] template is empty')
+    return []
+  }
+  
+  console.log('[preview-renderer] parsing template:', tmpl.substring(0, 200))
+  const nodes = parseTemplate(tmpl)
+  console.log('[preview-renderer] parsed nodes count:', nodes.length)
+  if (nodes.length > 0) {
+    console.log('[preview-renderer] first node tag:', nodes[0].tag, 'children:', nodes[0].children.length)
+  }
+  return nodes
+})
+
+function parseTemplate(template: string): ComponentNode[] {
+  const nodes: ComponentNode[] = []
+  let pos = 0
+  
+  while (pos < template.length) {
+    // 跳过空白字符（但保留用于调试）
+    const whitespaceStart = pos
+    while (pos < template.length && /\s/.test(template[pos])) {
+      pos++
+    }
+    if (pos >= template.length) break
+    
+    // 检查是否是标签开始
+    if (template[pos] === '<') {
+      // 检查是否是结束标签
+      if (template[pos + 1] === '/') {
+        // 遇到结束标签，返回上层处理
+        break
+      }
+      
+      const tagMatch = template.substring(pos).match(/^<([\w-]+)([^>]*)>/)
+      if (tagMatch != null) {
+        const tagName = tagMatch[1]
+        const attrsStr = tagMatch[2] || ''
+        const fullTag = tagMatch[0]
+        
+        // 解析属性
+        const attrs = parseAttributes(attrsStr)
+        
+        // 检查是否是自闭合标签
+        if (attrsStr.trim().endsWith('/') || isSelfClosingTag(tagName)) {
+          nodes.push({
+            type: 'component',
+            tag: tagName,
+            attrs,
+            children: []
+          })
+          pos += fullTag.length
+        } else {
+          // 查找匹配的结束标签（考虑嵌套）
+          const endTag = `</${tagName}>`
+          let endPos = -1
+          let depth = 1
+          let searchPos = pos + fullTag.length
+          
+          while (searchPos < template.length && depth > 0) {
+            const nextOpen = template.indexOf(`<${tagName}`, searchPos)
+            const nextOpenTag = template.indexOf(`<${tagName} `, searchPos)
+            const nextOpenTag2 = template.indexOf(`<${tagName}>`, searchPos)
+            const nextOpenPos = nextOpenTag !== -1 ? nextOpenTag : (nextOpenTag2 !== -1 ? nextOpenTag2 : nextOpen)
+            const nextClose = template.indexOf(endTag, searchPos)
+            
+            if (nextClose === -1) {
+              // 没有找到结束标签
+              break
+            }
+            
+            if (nextOpenPos !== -1 && nextOpenPos < nextClose) {
+              // 找到了嵌套的开始标签
+              depth++
+              searchPos = nextOpenPos + tagName.length + 1
+            } else {
+              // 找到了结束标签
+              depth--
+              if (depth === 0) {
+                endPos = nextClose
+                break
+              }
+              searchPos = nextClose + endTag.length
+            }
+          }
+          
+          if (endPos > pos) {
+            const content = template.substring(pos + fullTag.length, endPos).trim()
+            console.log(`[parseTemplate] Parsing content for <${tagName}> (length: ${content.length}):`, content.substring(0, 150))
+            
+            // 递归解析子节点
+            const children = parseTemplate(content)
+            console.log(`[parseTemplate] Parsed ${children.length} children for <${tagName}>:`, children.map(c => c.tag).join(', '))
+            
+            // 如果内容没有解析出子节点，但有文本内容，创建一个文本节点
+            if (children.length === 0 && content) {
+              // 检查是否包含标签（可能是解析失败）
+              if (content.indexOf('<') === -1) {
+                // 纯文本
+                children.push({
+                  type: 'text',
+                  tag: 'text',
+                  attrs: {},
+                  children: [],
+                  text: content
+                })
+              } else {
+                // 包含标签但解析失败，尝试手动解析
+                console.warn(`[parseTemplate] Failed to parse content for <${tagName}>, content:`, content)
+              }
+            }
+            
+            nodes.push({
+              type: 'component',
+              tag: tagName,
+              attrs,
+              children
+            })
+            pos = endPos + endTag.length
+          } else {
+            // 没有找到结束标签，当作自闭合处理
+            nodes.push({
+              type: 'component',
+              tag: tagName,
+              attrs,
+              children: []
+            })
+            pos += fullTag.length
+          }
+        }
+      } else {
+        pos++
+      }
+    } else {
+      // 文本内容
+      const textEnd = template.indexOf('<', pos)
+      if (textEnd > pos) {
+        const text = template.substring(pos, textEnd).trim()
+        if (text) {
+          nodes.push({
+            type: 'text',
+            tag: 'text',
+            attrs: {},
+            children: [],
+            text
+          })
+        }
+        pos = textEnd
+      } else {
+        const text = template.substring(pos).trim()
+        if (text) {
+          nodes.push({
+            type: 'text',
+            tag: 'text',
+            attrs: {},
+            children: [],
+            text
+          })
+        }
+        break
+      }
+    }
+  }
+  
+  return nodes
+}
+
+function parseAttributes(attrsStr: string): Record<string, string> {
+  const attrs: Record<string, string> = {}
+  if (!attrsStr.trim()) return attrs
+  
+  // 解析属性，支持单引号和双引号
+  const attrPattern = /(\w+(?:-\w+)*)=["']([^"']*)["']/g
+  let match: RegExpMatchArray | null
+  
+  while ((match = attrPattern.exec(attrsStr)) != null) {
+    const key = match[1]
+    const value = match[2]
+    attrs[key] = value
+  }
+  
+  // 处理没有引号的属性（如 disabled, readonly 等布尔属性）
+  const booleanAttrPattern = /\s+(\w+(?:-\w+)*)(?=\s|>)/g
+  while ((match = booleanAttrPattern.exec(attrsStr)) != null) {
+    const key = match[1]
+    // 如果这个属性还没有被解析（没有值），则设置为空字符串（表示 true）
+    if (attrs[key] == null) {
+      attrs[key] = ''
+    }
+  }
+  
+  return attrs
+}
+
+function isSelfClosingTag(tag: string): boolean {
+  const selfClosingTags = ['img', 'input', 'br', 'hr', 'meta', 'link']
+  return selfClosingTags.includes(tag.toLowerCase())
+}
+
+const previewInfo = computed(() => {
+  const tmpl = template.value
+  if (!tmpl) return '暂无预览内容'
+  
+  // 统计使用的组件
+  const components: string[] = []
+  const componentPattern = /<bl-([a-z-]+)/gi
+  const matches = tmpl.matchAll(componentPattern)
+  for (const match of matches) {
+    const compName = `bl-${match[1]}`
+    if (!components.includes(compName)) {
+      components.push(compName)
+    }
+  }
+  
+  if (components.length > 0) {
+    return `使用了组件: ${components.join(', ')}`
+  }
+  return '请查看代码了解详情'
+})
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.preview-renderer {
+  width: 100%;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $vp-spacing-lg;
+  box-sizing: border-box;
+}
+
+.preview-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $vp-spacing-md;
+}
+
+.preview-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $vp-spacing-sm;
+}
+
+.preview-info-text {
+  font-size: $vp-font-size-base;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+}
+
+.preview-info-desc {
+  font-size: $vp-font-size-sm;
+  color: $vp-c-text-2;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.debug-text {
+  font-size: $vp-font-size-xs;
+  color: #856404;
+  font-family: 'Monaco', 'Courier New', monospace;
+  display: block;
+  margin-bottom: $vp-spacing-xs;
+  line-height: 1.4;
+}
+
+.preview-debug {
+  width: 100%;
+  padding: $vp-spacing-sm;
+  background: $vp-c-bg-soft;
+  border: 1px dashed $vp-c-divider;
+  border-radius: $vp-border-radius-sm;
+  margin-bottom: $vp-spacing-md;
+}
+
+.debug-text {
+  font-size: $vp-font-size-xs;
+  color: $vp-c-text-3;
+  font-family: 'Monaco', 'Courier New', monospace;
+  display: block;
+  margin-bottom: $vp-spacing-xs;
+}
+
+.preview-debug-text {
+  font-size: $vp-font-size-xs;
+  color: $vp-c-text-3;
+  margin-top: $vp-spacing-sm;
+  display: block;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+</style>

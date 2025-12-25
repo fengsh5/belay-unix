@@ -1,0 +1,19 @@
+<template>
+  <view class="example-basic">
+    <bl-collapse>
+      <bl-collapse-panel :key="1" header="面板1">
+        <text>这是面板1的内容</text>
+      </bl-collapse-panel>
+      <bl-collapse-panel :key="2" header="面板2">
+        <text>这是面板2的内容</text>
+      </bl-collapse-panel>
+    </bl-collapse>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

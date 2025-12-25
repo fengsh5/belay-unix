@@ -1,0 +1,33 @@
+<template>
+  <view class="example-basic">
+    <view class="content">
+      <text>内容区域</text>
+    </view>
+    <bl-bottom-bar :fixed="false">
+      <view class="bottom-bar-content">
+        <bl-button size="small">操作1</bl-button>
+        <bl-button size="small" type="primary">操作2</bl-button>
+      </view>
+    </bl-bottom-bar>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  position: relative;
+  min-height: 200px;
+}
+
+.content {
+  padding: 20px;
+  text-align: center;
+}
+
+.bottom-bar-content {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+</style>
+

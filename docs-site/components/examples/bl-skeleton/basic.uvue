@@ -1,0 +1,12 @@
+<template>
+  <view class="example-basic">
+    <bl-skeleton></bl-skeleton>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

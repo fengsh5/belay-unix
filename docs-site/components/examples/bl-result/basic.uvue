@@ -1,0 +1,13 @@
+<template>
+  <view class="example-basic">
+    <bl-result title="操作成功" sub-title="这是一条成功提示信息"></bl-result>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  min-height: 300px;
+}
+</style>
+

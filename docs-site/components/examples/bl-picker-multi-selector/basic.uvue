@@ -1,0 +1,32 @@
+<template>
+  <view class="example-basic">
+    <bl-picker-multi-selector 
+      :range="multiRange" 
+      :value="selectedValues"
+      placeholder="请选择"
+      @change="handleChange"
+    ></bl-picker-multi-selector>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const multiRange = ref([
+  ['选项1', '选项2', '选项3'],
+  ['选项A', '选项B', '选项C']
+])
+
+const selectedValues = ref<number[]>([])
+
+const handleChange = (value: any[]) => {
+  selectedValues.value = value as number[]
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

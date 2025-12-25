@@ -1,0 +1,18 @@
+<template>
+  <view class="example-basic">
+    <bl-avatar 
+      src="https://pic.616pic.com/photoone/00/02/58/618cf527354c35308.jpg!/fw/1120" 
+      size="large"
+    ></bl-avatar>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

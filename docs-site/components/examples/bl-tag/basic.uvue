@@ -1,0 +1,15 @@
+<template>
+  <view class="example-basic">
+    <bl-tag>标签</bl-tag>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

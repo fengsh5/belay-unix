@@ -1,0 +1,17 @@
+<template>
+  <view class="example-basic">
+    <bl-popover title="标题" content="这是气泡卡片内容">
+      <bl-button>点击查看气泡卡片</bl-button>
+    </bl-popover>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

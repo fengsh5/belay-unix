@@ -1,0 +1,15 @@
+<template>
+  <view class="example-basic">
+    <bl-number-input :value="1"></bl-number-input>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

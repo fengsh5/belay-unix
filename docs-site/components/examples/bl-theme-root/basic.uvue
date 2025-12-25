@@ -1,0 +1,23 @@
+<template>
+  <view class="example-basic">
+    <bl-theme-root theme="light">
+      <view class="root-content">
+        <text>主题根组件内容</text>
+      </view>
+    </bl-theme-root>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.root-content {
+  padding: 20px;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 8px;
+}
+</style>
+

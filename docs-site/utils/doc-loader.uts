@@ -1,0 +1,180 @@
+/**
+ * 文档加载器
+ * 用于加载和解析组件文档
+ */
+
+export type ComponentDoc = {
+  name: string
+  title: string
+  description: string
+  category: string
+  path: string
+  examples?: ExampleCode[]
+}
+
+export type ExampleCode = {
+  title: string
+  code: string
+  description?: string
+}
+
+// 组件分类
+export const componentCategories = {
+  '基础组件': [
+    'bl-alert', 'bl-amount', 'bl-avatar', 'bl-badge', 'bl-button',
+    'bl-cell', 'bl-divider', 'bl-flex', 'bl-gap', 'bl-hairline',
+    'bl-icon', 'bl-image', 'bl-message', 'bl-rate', 'bl-segmented',
+    'bl-text', 'bl-view'
+  ],
+  '表单组件': [
+    'bl-autocomplete', 'bl-checkbox', 'bl-checkbox-group', 'bl-checkbox-popup',
+    'bl-checker', 'bl-checker-popup', 'bl-form', 'bl-input', 'bl-number-input',
+    'bl-radio', 'bl-radio-group', 'bl-radio-popup', 'bl-search-bar',
+    'bl-slider', 'bl-switch', 'bl-textarea', 'bl-treeselect', 'bl-uploader'
+  ],
+  '反馈组件': [
+    'bl-dialog', 'bl-drawer', 'bl-empty', 'bl-error-capture', 'bl-loading',
+    'bl-modal', 'bl-notice-bar', 'bl-notification', 'bl-popconfirm',
+    'bl-popup', 'bl-popover', 'bl-progress', 'bl-spinner', 'bl-tour'
+  ],
+  '展示组件': [
+    'bl-calendar', 'bl-card-layout', 'bl-collapse', 'bl-count-down',
+    'bl-descriptions', 'bl-float-button', 'bl-qrcode', 'bl-result',
+    'bl-skeleton', 'bl-statistic', 'bl-tag', 'bl-check-tag', 'bl-sort-tag',
+    'bl-timeline', 'bl-transfer', 'bl-tree', 'bl-watermark'
+  ],
+  '导航组件': [
+    'bl-back-top', 'bl-custom-navigation-bar', 'bl-menu', 'bl-pagination',
+    'bl-tabbar', 'bl-tab-button', 'bl-tab-panel', 'bl-tabs', 'bl-mp-custom-tabbar'
+  ],
+  '布局组件': [
+    'bl-bottom-bar', 'bl-col', 'bl-filter', 'bl-flex', 'bl-grid', 'bl-grid-item',
+    'bl-page', 'bl-page-style', 'bl-row', 'bl-scroll-view', 'bl-list-view', 'bl-space'
+  ],
+  '其他组件': [
+    'bl-picker-cascader-selector', 'bl-picker-date', 'bl-picker-multi-selector',
+    'bl-picker-selector', 'bl-picker-time', 'bl-portal', 'bl-poster-painter',
+    'bl-preview-context', 'bl-share-app-message', 'bl-share-dialog', 'bl-share-poster',
+    'bl-step', 'bl-steps', 'bl-swiper', 'bl-theme', 'bl-theme-provider',
+    'bl-theme-root', 'bl-i18n-provider', 'bl-video', 'bl-tooltip', 'bl-noop'
+  ]
+}
+
+/**
+ * 加载组件文档
+ */
+export async function loadComponentDoc(componentName: string): Promise<ComponentDoc | null> {
+  try {
+    // 从 uni_modules 组件目录加载 README.md
+    const paths = [
+      `/uni_modules/belay-unix/components/${componentName}/README.md`,
+      `../uni_modules/belay-unix/components/${componentName}/README.md`,
+      `../../uni_modules/belay-unix/components/${componentName}/README.md`
+    ]
+    
+    let markdown = ''
+    let lastError: Error | null = null
+    
+    for (const path of paths) {
+      try {
+        const response = await fetch(path)
+        if (response != null && response.ok) {
+          markdown = await response.text()
+          break
+        }
+      } catch (error) {
+        lastError = error as Error
+        continue
+      }
+    }
+    
+    if (!markdown) {
+      console.warn(`Failed to load doc for ${componentName} from all paths`, lastError)
+      // 返回基础文档结构
+      return {
+        name: componentName,
+        title: componentName.replace('bl-', '').replace(/-/g, ' '),
+        description: `${componentName} 组件文档`,
+        category: '其他组件',
+        path: '',
+        examples: []
+      }
+    }
+    
+    // 解析 Markdown
+    const titleMatch = markdown.match(/^#\s+(.+)/m)
+    const descriptionMatch = markdown.match(/^(.+)\n\n##/m)
+    
+    // 提取示例代码
+    const examples: ExampleCode[] = []
+    const exampleRegex = /###\s+(.+?)\n\n<ClientOnly>[\s\S]*?code="([^"]+)"[\s\S]*?<\/ClientOnly>/g
+    let match: RegExpMatchArray | null = null
+    while ((match = exampleRegex.exec(markdown)) != null) {
+      if (match != null && match.length >= 3) {
+        examples.push({
+          title: match[1],
+          code: match[2].replace(/\\n/g, '\n').replace(/\\</g, '<').replace(/\\>/g, '>')
+        })
+      }
+    }
+    
+    // 查找分类
+    let category = '其他组件'
+    for (const [cat, components] of Object.entries(componentCategories)) {
+      if (components != null && components.includes(componentName)) {
+        category = cat
+        break
+      }
+    }
+    
+    return {
+      name: componentName,
+      title: titleMatch ? titleMatch[1] : componentName,
+      description: descriptionMatch ? descriptionMatch[1] : '',
+      category,
+      path: `/components/${componentName}.md`,
+      examples
+    }
+  } catch (error) {
+    console.error(`Error loading doc for ${componentName}:`, error)
+    return null
+  }
+}
+
+/**
+ * 获取所有组件列表
+ */
+export function getAllComponents(): ComponentDoc[] {
+  const components: ComponentDoc[] = []
+  
+  for (const [category, componentNames] of Object.entries(componentCategories)) {
+    if (componentNames != null) {
+      for (const name of componentNames) {
+        components.push({
+          name,
+          title: name.replace('bl-', '').replace(/-/g, ' '),
+          description: '',
+          category,
+          path: `/components/${name}.md`
+        })
+      }
+    }
+  }
+  
+  return components
+}
+
+/**
+ * 按分类获取组件
+ */
+export function getComponentsByCategory(category: string): ComponentDoc[] {
+  const componentNames = componentCategories[category as keyof typeof componentCategories] || []
+  return componentNames.map(name => ({
+    name,
+    title: name.replace('bl-', '').replace(/-/g, ' '),
+    description: '',
+    category,
+    path: `/components/${name}.md`
+  }))
+}
+

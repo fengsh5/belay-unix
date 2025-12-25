@@ -1,0 +1,41 @@
+<template>
+  <view class="example-basic">
+    <bl-error-capture :error="errorMsg" :show-error="showError" @retry="handleRetry">
+      <view class="normal-content">
+        <text>正常内容显示</text>
+      </view>
+    </bl-error-capture>
+    <bl-button @click="toggleError" style="margin-top: 12px;">
+      {{ showError ? '隐藏错误' : '显示错误' }}
+    </bl-button>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const errorMsg = ref('这是一个错误示例')
+const showError = ref(false)
+
+const toggleError = () => {
+  showError.value = !showError.value
+}
+
+const handleRetry = () => {
+  showError.value = false
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.normal-content {
+  padding: 20px;
+  text-align: center;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+}
+</style>
+

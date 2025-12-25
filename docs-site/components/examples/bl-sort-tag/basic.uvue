@@ -1,0 +1,25 @@
+<template>
+  <view class="example-basic">
+    <bl-sort-tag text="价格" :sort="sort" @change="handleChange"></bl-sort-tag>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const sort = ref<'' | 'asc' | 'desc'>('')
+
+const handleChange = (newSort: '' | 'asc' | 'desc') => {
+  sort.value = newSort
+}
+</script>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+

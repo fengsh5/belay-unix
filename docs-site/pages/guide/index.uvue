@@ -1,0 +1,122 @@
+<template>
+  <doc-layout :sidebar-groups="sidebarGroups" :show-sidebar="true" :show-toc="false">
+    <view class="guide-content">
+      <view class="page-header">
+        <text class="page-title">使用指南</text>
+        <text class="page-description">了解如何安装、配置和使用 Belay-Unix 组件库</text>
+      </view>
+      
+      <view class="content">
+        <view class="guide-section" v-for="guide in guides" :key="guide.id">
+          <text class="guide-title">{{ guide.title }}</text>
+          <text class="guide-content">{{ guide.content }}</text>
+          <code-highlight v-if="guide.code" :code="guide.code" :language="guide.language || 'bash'"></code-highlight>
+        </view>
+      </view>
+    </view>
+  </doc-layout>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+import { guideSidebar, type SidebarGroup } from '@/utils/sidebar-config'
+
+const sidebarGroups = computed(() => {
+  return guideSidebar
+})
+
+const guides = ref([
+  {
+    id: 'install',
+    title: '安装',
+    content: '通过 npm 安装组件库：',
+    code: 'npm install belay-unix',
+    language: 'bash'
+  },
+  {
+    id: 'import',
+    title: '引入',
+    content: '在页面中引入组件：',
+    code: `import { BlButton } from '@/uni_modules/belay-unix'`,
+    language: 'typescript'
+  },
+  {
+    id: 'usage',
+    title: '使用',
+    content: '在模板中使用组件：',
+    code: `<template>
+  <view>
+    <bl-button type="primary">按钮</bl-button>
+  </view>
+</template>`,
+    language: 'vue'
+  },
+  {
+    id: 'easycom',
+    title: 'Easycom 配置',
+    content: '在 pages.json 中配置 easycom，即可自动导入组件，无需手动引入。',
+    code: `{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^bl-(.*)": "@/uni_modules/belay-unix/components/bl-$1/index.vue"
+    }
+  }
+}`,
+    language: 'json'
+  }
+])
+</script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.guide-content {
+  width: 100%;
+}
+
+.page-header {
+  margin-bottom: $vp-spacing-xl;
+}
+
+.page-title {
+  font-size: $vp-font-size-3xl;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+  margin-bottom: $vp-spacing-sm;
+  display: block;
+}
+
+.page-description {
+  font-size: $vp-font-size-base;
+  color: $vp-c-text-2;
+  line-height: 1.7;
+  display: block;
+}
+
+.content {
+  width: 100%;
+}
+
+.guide-section {
+  margin-bottom: $vp-spacing-xl;
+}
+
+.guide-title {
+  font-size: $vp-font-size-xl;
+  font-weight: $vp-font-weight-semibold;
+  color: $vp-c-text-1;
+  margin-bottom: $vp-spacing-md;
+  margin-top: $vp-spacing-xl;
+  display: block;
+}
+
+.guide-content {
+  font-size: $vp-font-size-base;
+  color: $vp-c-text-1;
+  line-height: 1.7;
+  margin-bottom: $vp-spacing-md;
+  display: block;
+}
+</style>
+

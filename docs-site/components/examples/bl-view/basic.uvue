@@ -1,0 +1,14 @@
+<template>
+  <view class="example-basic">
+    <bl-view>
+      <text>视图容器内容</text>
+    </bl-view>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+</style>
+

@@ -1,0 +1,29 @@
+<template>
+  <view class="example-basic">
+    <bl-row :gutter-horizontal="16">
+      <bl-col :span="8">
+        <view class="col-item">8</view>
+      </bl-col>
+      <bl-col :span="8">
+        <view class="col-item">8</view>
+      </bl-col>
+      <bl-col :span="8">
+        <view class="col-item">8</view>
+      </bl-col>
+    </bl-row>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.col-item {
+  background: #f5f5f5;
+  padding: 12px;
+  text-align: center;
+  border-radius: 4px;
+}
+</style>
+

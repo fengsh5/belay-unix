@@ -1,0 +1,26 @@
+<template>
+  <view class="example-basic">
+    <view class="hairline-demo">
+      <bl-hairline :placement="['bottom']">
+        <view class="hairline-content">
+          <text>带底部细线的内容</text>
+        </view>
+      </bl-hairline>
+    </view>
+  </view>
+</template>
+
+<style lang="scss">
+.example-basic {
+  padding: 16px;
+}
+
+.hairline-demo {
+  background: #fff;
+}
+
+.hairline-content {
+  padding: 16px;
+}
+</style>
+
